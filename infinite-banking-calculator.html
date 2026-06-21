@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IUL Infinite Banking Calculator – Prince Financial Solutions</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ledger:#10312A; --ledger-2:#0A241E; --brass:#B08A3E; --brass-lt:#D4B36A;
+    --ink:#1A211E; --slate:#5A6B63; --hairline:#DDD8C9; --parch:#F7F3EA; --parch-2:#FBF8F1;
+    --rust:#9C4A2E; --green-pos:#2D6A4F; --white:#FFFFFF;
+  }
+  body { font-family:'Inter',sans-serif; background:var(--parch); color:var(--ink); line-height:1.55; }
+
+  .masthead { background:radial-gradient(ellipse at top right,var(--ledger) 0%,var(--ledger-2) 100%); color:var(--white); padding:34px 24px 28px; text-align:center; border-bottom:3px solid var(--brass); }
+  .masthead-eyebrow { font-size:10.5px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--brass-lt); margin-bottom:11px; }
+  .masthead h1 { font-family:'Fraunces',serif; font-weight:600; font-size:clamp(24px,4.2vw,33px); line-height:1.2; margin-bottom:9px; max-width:580px; margin-left:auto; margin-right:auto; }
+  .masthead p { font-size:13.5px; color:#BFD3CC; max-width:490px; margin:0 auto; }
+
+  .container { max-width:760px; margin:0 auto; padding:28px 20px 48px; }
+
+  .section-num { display:flex; align-items:baseline; gap:12px; margin-bottom:4px; }
+  .section-num .num { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--brass); font-weight:500; }
+  .section-num .label { font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--slate); }
+
+  .card { background:var(--white); border:1px solid var(--hairline); border-radius:6px; padding:28px 28px 24px; margin-bottom:20px; }
+  .card-title { font-family:'Fraunces',serif; font-size:20px; font-weight:600; color:var(--ledger); margin-bottom:6px; }
+  .card-subtitle { font-size:13px; color:var(--slate); margin-bottom:20px; max-width:560px; }
+
+  .field-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:520px){ .field-grid{ grid-template-columns:1fr; } }
+  .field { display:flex; flex-direction:column; gap:6px; }
+  .field.full { grid-column:1/-1; }
+  label { font-size:11px; font-weight:600; color:var(--slate); text-transform:uppercase; letter-spacing:0.5px; }
+  .input-wrap { position:relative; }
+  .input-prefix { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:13px; color:var(--slate); font-weight:500; pointer-events:none; }
+  input[type="number"] { width:100%; padding:10px 12px 10px 26px; border:1.5px solid var(--hairline); border-radius:6px; font-size:14px; font-family:'JetBrains Mono',monospace; color:var(--ink); background:var(--parch); }
+  input[type="number"].no-prefix{ padding-left:12px; }
+  input[type="number"]:focus { outline:none; border-color:var(--brass); box-shadow:0 0 0 3px rgba(176,138,62,.12); background:var(--white); }
+  .hint { font-size:10.5px; color:#94A39C; margin-top:1px; line-height:1.4; }
+
+  .range-field { display:flex; flex-direction:column; gap:7px; }
+  .range-header { display:flex; justify-content:space-between; align-items:center; }
+  .range-val { font-size:14px; font-weight:700; color:var(--white); background:var(--ledger); padding:2px 9px; border-radius:20px; min-width:46px; text-align:center; font-family:'JetBrains Mono',monospace; }
+  input[type="range"] { -webkit-appearance:none; width:100%; height:6px; background:linear-gradient(to right,var(--brass) 0%,var(--brass) var(--pct,50%),var(--hairline) var(--pct,50%)); border-radius:3px; cursor:pointer; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; background:var(--brass); border:3px solid var(--white); border-radius:50%; box-shadow:0 1px 4px rgba(0,0,0,.2); cursor:pointer; }
+
+  .arb-strip { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:18px; }
+  @media (max-width:520px){ .arb-strip{ grid-template-columns:1fr; } }
+  .arb-cell { background:var(--parch-2); border:1px solid var(--hairline); border-radius:6px; padding:14px 16px; text-align:center; }
+  .arb-cell .ac-label { font-size:10px; text-transform:uppercase; letter-spacing:0.6px; color:var(--slate); font-weight:600; margin-bottom:5px; }
+  .arb-cell .ac-val { font-family:'Fraunces',serif; font-size:24px; font-weight:600; }
+  .arb-cell.earn .ac-val { color:var(--green-pos); }
+  .arb-cell.cost .ac-val { color:var(--rust); }
+  .arb-cell.net { background:var(--ledger); border-color:var(--ledger); }
+  .arb-cell.net .ac-label { color:var(--brass-lt); }
+  .arb-cell.net .ac-val { color:var(--brass-lt); }
+
+  .recapture-hero { text-align:center; padding:6px 0 4px; }
+  .recapture-hero .tag { font-size:10.5px; letter-spacing:2px; text-transform:uppercase; color:var(--slate); font-weight:600; margin-bottom:10px; }
+  .recapture-number { font-family:'Fraunces',serif; font-size:clamp(36px,7vw,52px); font-weight:600; line-height:1; color:var(--brass); margin-bottom:6px; }
+  .recapture-number.negative { color:var(--rust); }
+  .recapture-sub { font-size:13px; color:var(--slate); max-width:460px; margin:0 auto; }
+
+  .split-section { margin-top:24px; }
+  .split-section h3 { font-size:13px; font-weight:700; color:var(--ledger); margin-bottom:14px; }
+  .split-row { display:flex; flex-direction:column; gap:5px; margin-bottom:14px; }
+  .split-meta { display:flex; justify-content:space-between; font-size:12.5px; }
+  .split-name { font-weight:600; color:var(--ink); }
+  .split-amt { font-weight:700; color:var(--slate); font-family:'JetBrains Mono',monospace; }
+  .split-track { height:22px; background:var(--hairline); border-radius:5px; overflow:hidden; display:flex; }
+  .split-fill { height:100%; transition:width 1s ease; display:flex; align-items:center; padding-left:8px; font-size:10.5px; font-weight:700; color:var(--white); white-space:nowrap; }
+
+  .breakdown { margin-top:22px; }
+  .bd-row { display:flex; justify-content:space-between; align-items:baseline; padding:11px 0; border-bottom:1px solid var(--hairline); font-size:13.5px; }
+  .bd-row:last-child{ border-bottom:none; }
+  .bd-row.total { border-top:2px solid var(--ledger); margin-top:4px; padding-top:13px; font-weight:700; font-size:15px; }
+  .bd-row.highlight .bd-val { color:var(--brass); font-weight:700; }
+  .bd-label { color:var(--ink); }
+  .bd-label .bd-note { display:block; font-size:10.5px; color:var(--slate); font-weight:400; margin-top:1px; }
+  .bd-val { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--ink); }
+
+  .scenario-toggle { display:flex; gap:0; background:var(--parch-2); border:1.5px solid var(--hairline); border-radius:8px; padding:4px; margin-bottom:20px; }
+  .scenario-btn { flex:1; padding:11px 8px; text-align:center; border:none; background:transparent; cursor:pointer; border-radius:5px; transition:all .2s; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; color:var(--slate); }
+  .scenario-btn.active { background:var(--ledger); color:var(--white); }
+  .scenario-btn .sb-sub { display:block; font-size:9.5px; font-weight:400; opacity:0.8; margin-top:1px; }
+
+  .formula-block { background:var(--ledger); color:var(--white); border-radius:6px; padding:20px 24px; margin:16px 0 4px; overflow-x:auto; }
+  .formula-block .ftitle { font-size:10px; letter-spacing:1.8px; text-transform:uppercase; color:var(--brass-lt); margin-bottom:10px; font-weight:600; }
+  .formula-line { font-family:'JetBrains Mono',monospace; font-size:12.5px; color:#E4ECE7; line-height:1.85; white-space:pre; }
+  .formula-line .op { color:var(--brass-lt); }
+  .formula-line .eq { color:#9CCBB8; }
+
+  .example-box { background:var(--parch-2); border:1px dashed var(--brass); border-radius:6px; padding:16px 18px; margin-top:16px; }
+  .example-box .ex-label { font-size:10px; letter-spacing:1.4px; text-transform:uppercase; color:var(--brass); font-weight:700; margin-bottom:7px; }
+  .example-box p { font-size:12.5px; color:var(--ink); line-height:1.6; margin:0; }
+  .example-box .ex-figure { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--brass); }
+
+  .warn-box { background:#FBF1ED; border:1px solid #EAC6B8; border-radius:6px; padding:14px 16px; margin-top:16px; font-size:11.5px; color:#7A3A28; line-height:1.55; }
+  .warn-box strong { color:var(--rust); }
+
+  .cta-card { background:var(--ledger); border-radius:6px; padding:28px 30px; text-align:center; margin-top:22px; position:relative; overflow:hidden; }
+  .cta-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--brass); }
+  .cta-card h3 { font-family:'Fraunces',serif; font-size:21px; color:var(--white); margin-bottom:9px; font-weight:600; }
+  .cta-card p { font-size:12.5px; color:#BFD3CC; margin-bottom:18px; max-width:420px; margin-left:auto; margin-right:auto; }
+  .cta-btn { display:inline-block; background:var(--brass); color:var(--ledger-2); font-weight:700; font-size:13px; padding:13px 30px; border-radius:4px; cursor:pointer; border:none; font-family:'Inter',sans-serif; transition:all .2s; text-decoration:none; letter-spacing:0.3px; }
+  .cta-btn:hover { background:var(--brass-lt); }
+
+  .disclaimer { font-size:10px; color:#9D9683; text-align:center; margin-top:24px; line-height:1.65; max-width:580px; margin-left:auto; margin-right:auto; }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-eyebrow">Prince Financial Solutions · IUL Infinite Banking</div>
+  <h1>The Participating Loan Calculator</h1>
+  <p>See how an IUL participating loan can keep your cash value earning index credits even while you borrow against it — and what that arbitrage is actually worth.</p>
+</div>
+
+<div class="container">
+
+  <div class="section-num"><span class="num">01</span><span class="label">Your Policy &amp; Loan Assumptions</span></div>
+  <div class="card">
+    <div class="card-title">Set the Mechanics</div>
+    <div class="card-subtitle">With an IUL participating (non-direct-recognition) loan, your borrowed cash value continues earning the index crediting rate while the insurer charges loan interest. The difference between those two rates is the engine of the strategy.</div>
+
+    <div class="field-grid">
+      <div class="field">
+        <label for="avgLoan">Typical Amount Borrowed (per cycle)</label>
+        <div class="input-wrap"><span class="input-prefix">$</span><input type="number" id="avgLoan" min="0" value="40000" oninput="recalc()"></div>
+        <div class="hint">A car, a debt payoff, a real estate down payment, etc.</div>
+      </div>
+      <div class="field">
+        <label for="loanTerm">Time Borrowed (years per cycle)</label>
+        <div class="input-wrap"><input type="number" id="loanTerm" class="no-prefix" min="1" max="15" value="5" oninput="recalc()"></div>
+      </div>
+      <div class="field">
+        <label for="cycles">Cycles Over Your Lifetime</label>
+        <div class="input-wrap"><input type="number" id="cycles" class="no-prefix" min="1" max="20" value="8" oninput="recalc()"></div>
+        <div class="hint">How many times you'd repeat this financing pattern</div>
+      </div>
+      <div class="field">
+        <label for="extLoanRate">Outside Lender Rate (for comparison)</label>
+        <div class="input-wrap"><input type="number" id="extLoanRate" class="no-prefix" min="0" max="30" step="0.5" value="8" oninput="recalc()"></div>
+        <div class="hint">What a bank or credit card would charge (%)</div>
+      </div>
+      <div class="field full">
+        <label>IUL Index Crediting Rate</label>
+        <div class="range-field">
+          <div class="range-header"><span style="font-size:11.5px;color:var(--slate);">Illustrated crediting on cash value</span><span class="range-val" id="iulRateVal">6.5%</span></div>
+          <input type="range" id="iulRate" min="0" max="10" value="6.5" step="0.5" oninput="syncRange(this,'iulRateVal','%'); recalc()">
+        </div>
+        <div class="hint">2026 caps run 9–12%; illustrations use a conservative 6–7%. The 0% floor means a bad index year credits nothing — set this to 0% to see the worst case.</div>
+      </div>
+      <div class="field full">
+        <label>Policy Loan Interest Rate</label>
+        <div class="range-field">
+          <div class="range-header"><span style="font-size:11.5px;color:var(--slate);">Interest the insurer charges on the loan</span><span class="range-val" id="loanRateVal">5.5%</span></div>
+          <input type="range" id="loanRate" min="3" max="8" value="5.5" step="0.25" oninput="syncRange(this,'loanRateVal','%'); recalc()">
+        </div>
+        <div class="hint">Participating loans typically carry a fixed or variable charge in this range.</div>
+      </div>
+    </div>
+
+    <div class="arb-strip">
+      <div class="arb-cell earn">
+        <div class="ac-label">Cash Value Earns</div>
+        <div class="ac-val" id="arbEarn">6.5%</div>
+      </div>
+      <div class="arb-cell cost">
+        <div class="ac-label">Loan Costs</div>
+        <div class="ac-val" id="arbCost">5.5%</div>
+      </div>
+      <div class="arb-cell net">
+        <div class="ac-label">Net Spread</div>
+        <div class="ac-val" id="arbNet">+1.0%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-num"><span class="num">02</span><span class="label">The Outcome</span></div>
+  <div class="card">
+
+    <div class="scenario-toggle">
+      <button class="scenario-btn active" id="btnVsBank" onclick="setView('bank')">
+        vs. Borrowing From a Bank
+        <span class="sb-sub">Interest recaptured + arbitrage</span>
+      </button>
+      <button class="scenario-btn" id="btnArbOnly" onclick="setView('arb')">
+        Participating Loan Arbitrage
+        <span class="sb-sub">Earn-vs-cost spread only</span>
+      </button>
+    </div>
+
+    <div class="recapture-hero">
+      <div class="tag" id="heroTag">Estimated Lifetime Advantage vs. Bank Financing</div>
+      <div class="recapture-number" id="recaptureNumber">$0</div>
+      <div class="recapture-sub" id="recaptureSub"></div>
+    </div>
+
+    <div class="split-section" id="splitSection">
+      <h3>Where Your Financing Interest Goes</h3>
+      <div class="split-row">
+        <div class="split-meta"><span class="split-name">Bank financing — interest paid to lenders</span><span class="split-amt" id="bankInterest">$0</span></div>
+        <div class="split-track"><div class="split-fill" style="width:100%;background:var(--rust)" id="bankBar">Lost</div></div>
+      </div>
+      <div class="split-row">
+        <div class="split-meta"><span class="split-name">IUL participating loan — net advantage kept</span><span class="split-amt" id="recaptureAmt">$0</span></div>
+        <div class="split-track"><div class="split-fill" style="width:0%;background:var(--ledger)" id="recaptureBar">Kept</div></div>
+      </div>
+    </div>
+
+    <div class="breakdown" id="breakdown"></div>
+
+    <div class="warn-box" id="warnBox"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">The Formula</div>
+    <div class="card-subtitle">The participating-loan mechanic, shown explicitly — including the case where it works against you.</div>
+    <div class="formula-block">
+      <div class="ftitle">Participating Loan Net Position</div>
+<div class="formula-line">While borrowed against, per year:
+  Cash Value Credit <span class="eq">=</span> Borrowed Balance × Index Rate (0% floor)
+  Loan Interest Cost <span class="eq">=</span> Borrowed Balance × Loan Rate
+  Net Spread <span class="eq">=</span> Credit <span class="op">−</span> Loan Cost
+
+If Index Rate &gt; Loan Rate <span class="op">→</span> positive arbitrage (money works twice)
+If Index Rate &lt; Loan Rate <span class="op">→</span> negative carry (a flat index year)
+
+vs. Bank Financing:
+  Advantage <span class="eq">=</span> Interest you would have paid a lender
+            <span class="op">+</span> Net spread on the participating loan</div>
+    </div>
+    <div class="example-box" id="exampleBox"></div>
+  </div>
+
+  <div class="cta-card">
+    <h3>The Arbitrage Is Real — But Only With the Right Structure</h3>
+    <p>Participating loans, index crediting, and proper MEC-compliant funding all have to be designed correctly. Let's model your actual policy with a full carrier illustration.</p>
+    <a class="cta-btn" href="https://princefinancialsolutions.com" target="_blank">Design My IUL Banking System</a>
+  </div>
+
+  <p class="disclaimer">
+    This calculator provides a simplified educational estimate and is not financial, tax, or legal advice. It models a participating (non-direct-recognition) policy loan where borrowed cash value continues to receive index crediting; not all policies or carriers offer this feature, and crediting rates, caps, participation rates, loan charges, and policy expenses vary and are not guaranteed. The 0% floor protects against index losses, but cost of insurance and policy charges still apply in flat years and are not fully reflected here. A negative spread occurs whenever the loan rate exceeds the credited rate. Policy loans reduce cash value and death benefit; lapse with an outstanding loan may create taxable income. Request a full carrier illustration and consult a licensed professional before acting. © Prince Financial Solutions.
+  </p>
+
+</div>
+
+<script>
+function fmt(n){ const s = n<0?'−':''; n=Math.abs(n); if(n>=1e6) return s+'$'+(n/1e6).toFixed(2)+'M'; return s+'$'+Math.round(n).toLocaleString(); }
+function val(id){ return parseFloat(document.getElementById(id).value)||0; }
+function syncRange(el,labelId,suffix){ document.getElementById(labelId).textContent=el.value+(suffix||''); const pct=((el.value-el.min)/(el.max-el.min))*100; el.style.setProperty('--pct',pct+'%'); }
+['iulRate','loanRate'].forEach(id=>{ const el=document.getElementById(id); const pct=((el.value-el.min)/(el.max-el.min))*100; el.style.setProperty('--pct',pct+'%'); });
+
+let view = 'bank';
+function setView(v){
+  view = v;
+  document.getElementById('btnVsBank').classList.toggle('active', v==='bank');
+  document.getElementById('btnArbOnly').classList.toggle('active', v==='arb');
+  document.getElementById('splitSection').style.display = v==='bank' ? 'block' : 'none';
+  recalc();
+}
+
+const AVG_BAL_FACTOR = 0.55;
+
+function recalc(){
+  const avgLoan = val('avgLoan');
+  const loanTerm = val('loanTerm');
+  const cycles = val('cycles');
+  const extRate = val('extLoanRate')/100;
+  const iulRate = val('iulRate')/100;
+  const loanRate = val('loanRate')/100;
+
+  const spread = iulRate - loanRate;
+
+  document.getElementById('arbEarn').textContent = (iulRate*100).toFixed(1)+'%';
+  document.getElementById('arbCost').textContent = (loanRate*100).toFixed(1)+'%';
+  const netEl = document.getElementById('arbNet');
+  netEl.textContent = (spread>=0?'+':'−') + Math.abs(spread*100).toFixed(1)+'%';
+  netEl.style.color = spread>=0 ? 'var(--brass-lt)' : '#E89B7E';
+
+  const avgBal = avgLoan * AVG_BAL_FACTOR;
+
+  const extInterestPerCycle = avgBal * extRate * loanTerm;
+  const iulCreditPerCycle    = avgBal * Math.max(iulRate,0) * loanTerm;
+  const iulLoanCostPerCycle  = avgBal * loanRate * loanTerm;
+  const netSpreadPerCycle    = iulCreditPerCycle - iulLoanCostPerCycle;
+
+  const lifetimeBankInterest = extInterestPerCycle * cycles;
+  const lifetimeNetSpread    = netSpreadPerCycle * cycles;
+  const lifetimeVsBank       = lifetimeBankInterest + lifetimeNetSpread;
+
+  const heroNum = document.getElementById('recaptureNumber');
+  const heroTag = document.getElementById('heroTag');
+  const heroSub = document.getElementById('recaptureSub');
+
+  if(view === 'bank'){
+    heroTag.textContent = 'Estimated Lifetime Advantage vs. Bank Financing';
+    heroNum.textContent = fmt(lifetimeVsBank);
+    heroNum.className = 'recapture-number' + (lifetimeVsBank<0?' negative':'');
+    heroSub.textContent = 'Interest you would have paid a lender, plus the net spread your participating loan earns.';
+  } else {
+    heroTag.textContent = 'Lifetime Participating-Loan Arbitrage (Spread Only)';
+    heroNum.textContent = fmt(lifetimeNetSpread);
+    heroNum.className = 'recapture-number' + (lifetimeNetSpread<0?' negative':'');
+    heroSub.textContent = spread>=0
+      ? 'What your cash value earns above the loan cost while borrowed against — money working in two places.'
+      : 'At these rates the loan costs more than the index credits — a negative carry. This happens in flat index years.';
+  }
+
+  document.getElementById('bankInterest').textContent = fmt(lifetimeBankInterest);
+  document.getElementById('recaptureAmt').textContent = fmt(lifetimeVsBank);
+  const maxV = Math.max(lifetimeBankInterest, Math.abs(lifetimeVsBank)) || 1;
+  setTimeout(()=>{
+    document.getElementById('bankBar').style.width = (lifetimeBankInterest/maxV*100)+'%';
+    const rb = document.getElementById('recaptureBar');
+    rb.style.width = (Math.abs(lifetimeVsBank)/maxV*100)+'%';
+    rb.style.background = lifetimeVsBank<0 ? 'var(--rust)' : 'var(--ledger)';
+    rb.textContent = lifetimeVsBank<0 ? 'Negative' : 'Kept';
+  },150);
+
+  const rows = [
+    { label:'Amount borrowed per cycle', val: avgLoan },
+    { label:'Average outstanding balance', note:'≈55% of principal over an amortizing term', val: avgBal },
+    { label:'Index credit on borrowed balance / cycle', note:`${(iulRate*100).toFixed(1)}% over ${loanTerm} yrs (0% floor)`, val: iulCreditPerCycle },
+    { label:'Loan interest cost / cycle', note:`${(loanRate*100).toFixed(1)}% over ${loanTerm} yrs`, val: -iulLoanCostPerCycle },
+    { label:'Net spread per cycle', val: netSpreadPerCycle, highlight:true },
+    { label:`Lifetime net spread (× ${cycles} cycles)`, val: lifetimeNetSpread, highlight:true },
+  ];
+  if(view === 'bank'){
+    rows.push({ label:'Lifetime interest avoided (vs. bank)', note:`vs. an outside lender at ${(extRate*100).toFixed(1)}%`, val: lifetimeBankInterest, highlight:true });
+    rows.push({ label:'Total lifetime advantage vs. bank', val: lifetimeVsBank, total:true });
+  } else {
+    rows.push({ label:'Total lifetime arbitrage', val: lifetimeNetSpread, total:true });
+  }
+  document.getElementById('breakdown').innerHTML = rows.map(r=>`
+    <div class="bd-row ${r.highlight?'highlight':''} ${r.total?'total':''}">
+      <div class="bd-label">${r.label}${r.note?`<span class="bd-note">${r.note}</span>`:''}</div>
+      <div class="bd-val">${r.val<0?'('+fmt(Math.abs(r.val))+')':fmt(r.val)}</div>
+    </div>
+  `).join('');
+
+  const warn = document.getElementById('warnBox');
+  if(spread < 0){
+    warn.innerHTML = `<strong>Negative carry at these rates.</strong> Your loan rate (${(loanRate*100).toFixed(1)}%) currently exceeds the index credit (${(iulRate*100).toFixed(1)}%). This is exactly what happens in a flat index year with the 0% floor — the participating loan costs more than it earns. The strategy still recaptures interest you'd otherwise pay a bank, but the arbitrage itself works against you until index crediting recovers.`;
+  } else {
+    warn.innerHTML = `<strong>One honest note:</strong> This model shows the rate arbitrage but does not subtract cost of insurance and policy charges, which apply every year and are heaviest in years 1–10. A real carrier illustration will net these out. The positive spread shown assumes the index credits at ${(iulRate*100).toFixed(1)}% — in a flat year it credits 0% and the spread turns negative.`;
+  }
+
+  document.getElementById('exampleBox').innerHTML = `
+    <div class="ex-label">Your Scenario</div>
+    <p>Borrowing <span class="ex-figure">${fmt(avgLoan)}</span> for <span class="ex-figure">${loanTerm} years</span>, repeated <span class="ex-figure">${cycles} times</span>: your cash value keeps earning <span class="ex-figure">${(iulRate*100).toFixed(1)}%</span> while the loan costs <span class="ex-figure">${(loanRate*100).toFixed(1)}%</span> — a ${spread>=0?'positive':'negative'} spread of <span class="ex-figure">${(spread>=0?'+':'−')+Math.abs(spread*100).toFixed(1)}%</span>. Versus paying a bank <span class="ex-figure">${(extRate*100).toFixed(1)}%</span>, the estimated lifetime advantage is <strong>${fmt(lifetimeVsBank)}</strong>${spread<0?' — note the participating-loan spread itself is negative at these rates, so the advantage comes entirely from avoiding the bank.':''}.</p>
+  `;
+}
+recalc();
+</script>
+</body>
+</html>

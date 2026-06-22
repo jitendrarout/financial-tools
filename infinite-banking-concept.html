@@ -128,6 +128,111 @@
   .faq-item:last-child { border-bottom: none; }
   .faq-q { font-size: 15.5px; font-weight: 700; color: var(--ledger); margin-bottom: 7px; }
   .faq-a { font-size: 14px; color: var(--slate); line-height: 1.6; }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ledger:#10312A; --ledger-2:#0A241E; --brass:#B08A3E; --brass-lt:#D4B36A;
+    --ink:#1A211E; --slate:#5A6B63; --hairline:#DDD8C9; --parch:#F7F3EA; --parch-2:#FBF8F1;
+    --rust:#9C4A2E; --green-pos:#2D6A4F; --white:#FFFFFF;
+  }
+  body { font-family:'Inter',sans-serif; background:var(--parch); color:var(--ink); line-height:1.55; }
+
+  .calc-masthead { background:radial-gradient(ellipse at top right,var(--ledger) 0%,var(--ledger-2) 100%); color:var(--white); padding:34px 24px 28px; text-align:center; border-bottom:3px solid var(--brass); }
+  .calc-masthead-eyebrow { font-size:10.5px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--brass-lt); margin-bottom:11px; }
+  .calc-masthead h1 { font-family:'Fraunces',serif; font-weight:600; font-size:clamp(24px,4.2vw,33px); line-height:1.2; margin-bottom:9px; max-width:580px; margin-left:auto; margin-right:auto; }
+  .calc-masthead p { font-size:13.5px; color:#BFD3CC; max-width:490px; margin:0 auto; }
+
+  .calc-container { max-width:760px; margin:0 auto; padding:28px 20px 48px; }
+
+  .calc-section-num { display:flex; align-items:baseline; gap:12px; margin-bottom:4px; }
+  .calc-section-num .calc-num { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--brass); font-weight:500; }
+  .calc-section-num .calc-label { font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:var(--slate); }
+
+  .calc-card { background:var(--white); border:1px solid var(--hairline); border-radius:6px; padding:28px 28px 24px; margin-bottom:20px; }
+  .calc-card-title { font-family:'Fraunces',serif; font-size:20px; font-weight:600; color:var(--ledger); margin-bottom:6px; }
+  .calc-card-subtitle { font-size:13px; color:var(--slate); margin-bottom:20px; max-width:560px; }
+
+  .calc-field-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:520px){ .calc-field-grid{ grid-template-columns:1fr; } }
+  .calc-field { display:flex; flex-direction:column; gap:6px; }
+  .calc-field.calc-full { grid-column:1/-1; }
+  label { font-size:11px; font-weight:600; color:var(--slate); text-transform:uppercase; letter-spacing:0.5px; }
+  .calc-input-wrap { position:relative; }
+  .calc-input-prefix { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:13px; color:var(--slate); font-weight:500; pointer-events:none; }
+  input[type="number"] { width:100%; padding:10px 12px 10px 26px; border:1.5px solid var(--hairline); border-radius:6px; font-size:14px; font-family:'JetBrains Mono',monospace; color:var(--ink); background:var(--parch); }
+  input[type="number"].calc-no-prefix{ padding-left:12px; }
+  input[type="number"]:focus { outline:none; border-color:var(--brass); box-shadow:0 0 0 3px rgba(176,138,62,.12); background:var(--white); }
+  .calc-hint { font-size:10.5px; color:#94A39C; margin-top:1px; line-height:1.4; }
+
+  .calc-range-field { display:flex; flex-direction:column; gap:7px; }
+  .calc-range-header { display:flex; justify-content:space-between; align-items:center; }
+  .calc-range-val { font-size:14px; font-weight:700; color:var(--white); background:var(--ledger); padding:2px 9px; border-radius:20px; min-width:46px; text-align:center; font-family:'JetBrains Mono',monospace; }
+  input[type="range"] { -webkit-appearance:none; width:100%; height:6px; background:linear-gradient(to right,var(--brass) 0%,var(--brass) var(--pct,50%),var(--hairline) var(--pct,50%)); border-radius:3px; cursor:pointer; }
+  input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; background:var(--brass); border:3px solid var(--white); border-radius:50%; box-shadow:0 1px 4px rgba(0,0,0,.2); cursor:pointer; }
+
+  .calc-arb-strip { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:18px; }
+  @media (max-width:520px){ .calc-arb-strip{ grid-template-columns:1fr; } }
+  .calc-arb-cell { background:var(--parch-2); border:1px solid var(--hairline); border-radius:6px; padding:14px 16px; text-align:center; }
+  .calc-arb-cell .calc-ac-label { font-size:10px; text-transform:uppercase; letter-spacing:0.6px; color:var(--slate); font-weight:600; margin-bottom:5px; }
+  .calc-arb-cell .calc-ac-val { font-family:'Fraunces',serif; font-size:24px; font-weight:600; }
+  .calc-arb-cell.calc-earn .calc-ac-val { color:var(--green-pos); }
+  .calc-arb-cell.calc-cost .calc-ac-val { color:var(--rust); }
+  .calc-arb-cell.calc-net { background:var(--ledger); border-color:var(--ledger); }
+  .calc-arb-cell.calc-net .calc-ac-label { color:var(--brass-lt); }
+  .calc-arb-cell.calc-net .calc-ac-val { color:var(--brass-lt); }
+
+  .calc-recapture-hero { text-align:center; padding:6px 0 4px; }
+  .calc-recapture-hero .calc-tag { font-size:10.5px; letter-spacing:2px; text-transform:uppercase; color:var(--slate); font-weight:600; margin-bottom:10px; }
+  .calc-recapture-number { font-family:'Fraunces',serif; font-size:clamp(36px,7vw,52px); font-weight:600; line-height:1; color:var(--brass); margin-bottom:6px; }
+  .calc-recapture-number.calc-negative { color:var(--rust); }
+  .calc-recapture-sub { font-size:13px; color:var(--slate); max-width:460px; margin:0 auto; }
+
+  .calc-split-section { margin-top:24px; }
+  .calc-split-section h3 { font-size:13px; font-weight:700; color:var(--ledger); margin-bottom:14px; }
+  .calc-split-row { display:flex; flex-direction:column; gap:5px; margin-bottom:14px; }
+  .calc-split-meta { display:flex; justify-content:space-between; font-size:12.5px; }
+  .calc-split-name { font-weight:600; color:var(--ink); }
+  .calc-split-amt { font-weight:700; color:var(--slate); font-family:'JetBrains Mono',monospace; }
+  .calc-split-track { height:22px; background:var(--hairline); border-radius:5px; overflow:hidden; display:flex; }
+  .calc-split-fill { height:100%; transition:width 1s ease; display:flex; align-items:center; padding-left:8px; font-size:10.5px; font-weight:700; color:var(--white); white-space:nowrap; }
+
+  .calc-breakdown { margin-top:22px; }
+  .calc-bd-row { display:flex; justify-content:space-between; align-items:baseline; padding:11px 0; border-bottom:1px solid var(--hairline); font-size:13.5px; }
+  .calc-bd-row:last-child{ border-bottom:none; }
+  .calc-bd-row.calc-total { border-top:2px solid var(--ledger); margin-top:4px; padding-top:13px; font-weight:700; font-size:15px; }
+  .calc-bd-row.calc-highlight .calc-bd-val { color:var(--brass); font-weight:700; }
+  .calc-bd-label { color:var(--ink); }
+  .calc-bd-label .calc-bd-note { display:block; font-size:10.5px; color:var(--slate); font-weight:400; margin-top:1px; }
+  .calc-bd-val { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--ink); }
+
+  .calc-scenario-toggle { display:flex; gap:0; background:var(--parch-2); border:1.5px solid var(--hairline); border-radius:8px; padding:4px; margin-bottom:20px; }
+  .calc-scenario-btn { flex:1; padding:11px 8px; text-align:center; border:none; background:transparent; cursor:pointer; border-radius:5px; transition:all .2s; font-family:'Inter',sans-serif; font-size:12px; font-weight:600; color:var(--slate); }
+  .calc-scenario-btn.calc-active { background:var(--ledger); color:var(--white); }
+  .calc-scenario-btn .calc-sb-sub { display:block; font-size:9.5px; font-weight:400; opacity:0.8; margin-top:1px; }
+
+  .calc-formula-block { background:var(--ledger); color:var(--white); border-radius:6px; padding:20px 24px; margin:16px 0 4px; overflow-x:auto; }
+  .calc-formula-block .calc-ftitle { font-size:10px; letter-spacing:1.8px; text-transform:uppercase; color:var(--brass-lt); margin-bottom:10px; font-weight:600; }
+  .calc-formula-line { font-family:'JetBrains Mono',monospace; font-size:12.5px; color:#E4ECE7; line-height:1.85; white-space:pre; }
+  .calc-formula-line .calc-op { color:var(--brass-lt); }
+  .calc-formula-line .calc-eq { color:#9CCBB8; }
+
+  .calc-example-box { background:var(--parch-2); border:1px dashed var(--brass); border-radius:6px; padding:16px 18px; margin-top:16px; }
+  .calc-example-box .calc-ex-label { font-size:10px; letter-spacing:1.4px; text-transform:uppercase; color:var(--brass); font-weight:700; margin-bottom:7px; }
+  .calc-example-box p { font-size:12.5px; color:var(--ink); line-height:1.6; margin:0; }
+  .calc-example-box .calc-ex-figure { font-family:'JetBrains Mono',monospace; font-weight:600; color:var(--brass); }
+
+  .calc-warn-box { background:#FBF1ED; border:1px solid #EAC6B8; border-radius:6px; padding:14px 16px; margin-top:16px; font-size:11.5px; color:#7A3A28; line-height:1.55; }
+  .calc-warn-box strong { color:var(--rust); }
+
+  .calc-cta-card { background:var(--ledger); border-radius:6px; padding:28px 30px; text-align:center; margin-top:22px; position:relative; overflow:hidden; }
+  .calc-cta-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--brass); }
+  .calc-cta-card h3 { font-family:'Fraunces',serif; font-size:21px; color:var(--white); margin-bottom:9px; font-weight:600; }
+  .calc-cta-card p { font-size:12.5px; color:#BFD3CC; margin-bottom:18px; max-width:420px; margin-left:auto; margin-right:auto; }
+  .calc-cta-btn { display:inline-block; background:var(--brass); color:var(--ledger-2); font-weight:700; font-size:13px; padding:13px 30px; border-radius:4px; cursor:pointer; border:none; font-family:'Inter',sans-serif; transition:all .2s; text-decoration:none; letter-spacing:0.3px; }
+  .calc-cta-btn:hover { background:var(--brass-lt); }
+
+  .calc-disclaimer { font-size:10px; color:#9D9683; text-align:center; margin-top:24px; line-height:1.65; max-width:580px; margin-left:auto; margin-right:auto; }
+
 </style>
 </head>
 <body>
@@ -337,6 +442,149 @@
     </div>
   </section>
 
+
+  <!-- ═══════════ CALCULATOR ═══════════ -->
+  <section class="section" id="calculator" style="padding-top:8px;">
+    <div class="eyebrow">Try It Yourself</div>
+    <h2>The Participating Loan Calculator</h2>
+    <p class="lede">See how an IUL participating loan can keep your cash value earning index credits even while you borrow against it.</p>
+<div class="calc-masthead">
+  <div class="calc-masthead-eyebrow">Prince Financial Solutions · IUL Infinite Banking</div>
+  <h1>The Participating Loan Calculator</h1>
+  <p>See how an IUL participating loan can keep your cash value earning index credits even while you borrow against it — and what that arbitrage is actually worth.</p>
+</div>
+
+<div class="calc-container">
+
+  <div class="calc-section-num"><span class="calc-num">01</span><span class="calc-label">Your Policy &amp; Loan Assumptions</span></div>
+  <div class="calc-card">
+    <div class="calc-card-title">Set the Mechanics</div>
+    <div class="calc-card-subtitle">With an IUL participating (non-direct-recognition) loan, your borrowed cash value continues earning the index crediting rate while the insurer charges loan interest. The difference between those two rates is the engine of the strategy.</div>
+
+    <div class="calc-field-grid">
+      <div class="calc-field">
+        <label for="calc-avgLoan">Typical Amount Borrowed (per cycle)</label>
+        <div class="calc-input-wrap"><span class="calc-input-prefix">$</span><input type="number" id="calc-avgLoan" min="0" value="40000" oninput="calc_recalc()"></div>
+        <div class="calc-hint">A car, a debt payoff, a real estate down payment, etc.</div>
+      </div>
+      <div class="calc-field">
+        <label for="calc-loanTerm">Time Borrowed (years per cycle)</label>
+        <div class="calc-input-wrap"><input type="number" id="calc-loanTerm" class="calc-no-prefix" min="1" max="15" value="5" oninput="calc_recalc()"></div>
+      </div>
+      <div class="calc-field">
+        <label for="calc-cycles">Cycles Over Your Lifetime</label>
+        <div class="calc-input-wrap"><input type="number" id="calc-cycles" class="calc-no-prefix" min="1" max="20" value="8" oninput="calc_recalc()"></div>
+        <div class="calc-hint">How many times you'd repeat this financing pattern</div>
+      </div>
+      <div class="calc-field">
+        <label for="calc-extLoanRate">Outside Lender Rate (for comparison)</label>
+        <div class="calc-input-wrap"><input type="number" id="calc-extLoanRate" class="calc-no-prefix" min="0" max="30" step="0.5" value="8" oninput="calc_recalc()"></div>
+        <div class="calc-hint">What a bank or credit card would charge (%)</div>
+      </div>
+      <div class="calc-field calc-full">
+        <label>IUL Index Crediting Rate</label>
+        <div class="calc-range-field">
+          <div class="calc-range-header"><span style="font-size:11.5px;color:var(--slate);">Illustrated crediting on cash value</span><span class="calc-range-val" id="calc-iulRateVal">6.5%</span></div>
+          <input type="range" id="calc-iulRate" min="0" max="10" value="6.5" step="0.5" oninput="calc_syncRange(this,'calc-iulRateVal','%'); calc_recalc()">
+        </div>
+        <div class="calc-hint">2026 caps run 9–12%; illustrations use a conservative 6–7%. The 0% floor means a bad index year credits nothing — set this to 0% to see the worst case.</div>
+      </div>
+      <div class="calc-field calc-full">
+        <label>Policy Loan Interest Rate</label>
+        <div class="calc-range-field">
+          <div class="calc-range-header"><span style="font-size:11.5px;color:var(--slate);">Interest the insurer charges on the loan</span><span class="calc-range-val" id="calc-loanRateVal">5.5%</span></div>
+          <input type="range" id="calc-loanRate" min="3" max="8" value="5.5" step="0.25" oninput="calc_syncRange(this,'calc-loanRateVal','%'); calc_recalc()">
+        </div>
+        <div class="calc-hint">Participating loans typically carry a fixed or variable charge in this range.</div>
+      </div>
+    </div>
+
+    <div class="calc-arb-strip">
+      <div class="calc-arb-cell calc-earn">
+        <div class="calc-ac-label">Cash Value Earns</div>
+        <div class="calc-ac-val" id="calc-arbEarn">6.5%</div>
+      </div>
+      <div class="calc-arb-cell calc-cost">
+        <div class="calc-ac-label">Loan Costs</div>
+        <div class="calc-ac-val" id="calc-arbCost">5.5%</div>
+      </div>
+      <div class="calc-arb-cell calc-net">
+        <div class="calc-ac-label">Net Spread</div>
+        <div class="calc-ac-val" id="calc-arbNet">+1.0%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="calc-section-num"><span class="calc-num">02</span><span class="calc-label">The Outcome</span></div>
+  <div class="calc-card">
+
+    <div class="calc-scenario-toggle">
+      <button class="calc-scenario-btn calc-active" id="calc-btnVsBank" onclick="calc_setView('bank')">
+        vs. Borrowing From a Bank
+        <span class="calc-sb-sub">Interest recaptured + arbitrage</span>
+      </button>
+      <button class="calc-scenario-btn" id="calc-btnArbOnly" onclick="calc_setView('arb')">
+        Participating Loan Arbitrage
+        <span class="calc-sb-sub">Earn-vs-cost spread only</span>
+      </button>
+    </div>
+
+    <div class="calc-recapture-hero">
+      <div class="calc-tag" id="calc-heroTag">Estimated Lifetime Advantage vs. Bank Financing</div>
+      <div class="calc-recapture-number" id="calc-recaptureNumber">$0</div>
+      <div class="calc-recapture-sub" id="calc-recaptureSub"></div>
+    </div>
+
+    <div class="calc-split-section" id="calc-splitSection">
+      <h3>Where Your Financing Interest Goes</h3>
+      <div class="calc-split-row">
+        <div class="calc-split-meta"><span class="calc-split-name">Bank financing — interest paid to lenders</span><span class="calc-split-amt" id="calc-bankInterest">$0</span></div>
+        <div class="calc-split-track"><div class="calc-split-fill" style="width:100%;background:var(--rust)" id="calc-bankBar">Lost</div></div>
+      </div>
+      <div class="calc-split-row">
+        <div class="calc-split-meta"><span class="calc-split-name">IUL participating loan — net advantage kept</span><span class="calc-split-amt" id="calc-recaptureAmt">$0</span></div>
+        <div class="calc-split-track"><div class="calc-split-fill" style="width:0%;background:var(--ledger)" id="calc-recaptureBar">Kept</div></div>
+      </div>
+    </div>
+
+    <div class="calc-breakdown" id="calc-breakdown"></div>
+
+    <div class="calc-warn-box" id="calc-warnBox"></div>
+  </div>
+
+  <div class="calc-card">
+    <div class="calc-card-title">The Formula</div>
+    <div class="calc-card-subtitle">The participating-loan mechanic, shown explicitly — including the case where it works against you.</div>
+    <div class="calc-formula-block">
+      <div class="calc-ftitle">Participating Loan Net Position</div>
+<div class="calc-formula-line">While borrowed against, per year:
+  Cash Value Credit <span class="calc-eq">=</span> Borrowed Balance × Index Rate (0% floor)
+  Loan Interest Cost <span class="calc-eq">=</span> Borrowed Balance × Loan Rate
+  Net Spread <span class="calc-eq">=</span> Credit <span class="calc-op">−</span> Loan Cost
+
+If Index Rate &gt; Loan Rate <span class="calc-op">→</span> positive arbitrage (money works twice)
+If Index Rate &lt; Loan Rate <span class="calc-op">→</span> negative carry (a flat index year)
+
+vs. Bank Financing:
+  Advantage <span class="calc-eq">=</span> Interest you would have paid a lender
+            <span class="calc-op">+</span> Net spread on the participating loan</div>
+    </div>
+    <div class="calc-example-box" id="calc-exampleBox"></div>
+  </div>
+
+  <div class="calc-cta-card">
+    <h3>The Arbitrage Is Real — But Only With the Right Structure</h3>
+    <p>Participating loans, index crediting, and proper MEC-compliant funding all have to be designed correctly. Let's model your actual policy with a full carrier illustration.</p>
+    <a class="calc-cta-btn" href="https://princefinancialsolutions.com" target="_blank">Design My IUL Banking System</a>
+  </div>
+
+  <p class="calc-disclaimer">
+    This calculator provides a simplified educational estimate and is not financial, tax, or legal advice. It models a participating (non-direct-recognition) policy loan where borrowed cash value continues to receive index crediting; not all policies or carriers offer this feature, and crediting rates, caps, participation rates, loan charges, and policy expenses vary and are not guaranteed. The 0% floor protects against index losses, but cost of insurance and policy charges still apply in flat years and are not fully reflected here. A negative spread occurs whenever the loan rate exceeds the credited rate. Policy loans reduce cash value and death benefit; lapse with an outstanding loan may create taxable income. Request a full carrier illustration and consult a licensed professional before acting. © Prince Financial Solutions.
+  </p>
+
+</div>
+  </section>
+
   <!-- ═══════════ FAQ ═══════════ -->
   <section class="section">
     <div class="eyebrow">Common Questions</div>
@@ -367,5 +615,115 @@
 
 </div>
 
+<script>
+
+function calc_fmt(n){ const s = n<0?'−':''; n=Math.abs(n); if(n>=1e6) return s+'$'+(n/1e6).toFixed(2)+'M'; return s+'$'+Math.round(n).toLocaleString(); }
+function calc_val(id){ return parseFloat(document.getElementById(id).value)||0; }
+function calc_syncRange(el,labelId,suffix){ document.getElementById(labelId).textContent=el.value+(suffix||''); const pct=((el.value-el.min)/(el.max-el.min))*100; el.style.setProperty('--pct',pct+'%'); }
+['calc-iulRate','calc-loanRate'].forEach(id=>{ const el=document.getElementById(id); const pct=((el.value-el.min)/(el.max-el.min))*100; el.style.setProperty('--pct',pct+'%'); });
+
+let view = 'bank';
+function calc_setView(v){
+  view = v;
+  document.getElementById('calc-btnVsBank').classList.toggle('calc-active', v==='bank');
+  document.getElementById('calc-btnArbOnly').classList.toggle('calc-active', v==='arb');
+  document.getElementById('calc-splitSection').style.display = v==='bank' ? 'block' : 'none';
+  calc_recalc();
+}
+
+const AVG_BAL_FACTOR = 0.55;
+
+function calc_recalc(){
+  const avgLoan = calc_val('calc-avgLoan');
+  const loanTerm = calc_val('calc-loanTerm');
+  const cycles = calc_val('calc-cycles');
+  const extRate = calc_val('calc-extLoanRate')/100;
+  const iulRate = calc_val('calc-iulRate')/100;
+  const loanRate = calc_val('calc-loanRate')/100;
+
+  const spread = iulRate - loanRate;
+
+  document.getElementById('calc-arbEarn').textContent = (iulRate*100).toFixed(1)+'%';
+  document.getElementById('calc-arbCost').textContent = (loanRate*100).toFixed(1)+'%';
+  const netEl = document.getElementById('calc-arbNet');
+  netEl.textContent = (spread>=0?'+':'−') + Math.abs(spread*100).toFixed(1)+'%';
+  netEl.style.color = spread>=0 ? 'var(--brass-lt)' : '#E89B7E';
+
+  const avgBal = avgLoan * AVG_BAL_FACTOR;
+
+  const extInterestPerCycle = avgBal * extRate * loanTerm;
+  const iulCreditPerCycle    = avgBal * Math.max(iulRate,0) * loanTerm;
+  const iulLoanCostPerCycle  = avgBal * loanRate * loanTerm;
+  const netSpreadPerCycle    = iulCreditPerCycle - iulLoanCostPerCycle;
+
+  const lifetimeBankInterest = extInterestPerCycle * cycles;
+  const lifetimeNetSpread    = netSpreadPerCycle * cycles;
+  const lifetimeVsBank       = lifetimeBankInterest + lifetimeNetSpread;
+
+  const heroNum = document.getElementById('calc-recaptureNumber');
+  const heroTag = document.getElementById('calc-heroTag');
+  const heroSub = document.getElementById('calc-recaptureSub');
+
+  if(view === 'bank'){
+    heroTag.textContent = 'Estimated Lifetime Advantage vs. Bank Financing';
+    heroNum.textContent = calc_fmt(lifetimeVsBank);
+    heroNum.className = 'calc-recapture-number' + (lifetimeVsBank<0?' calc-negative':'');
+    heroSub.textContent = 'Interest you would have paid a lender, plus the net spread your participating loan earns.';
+  } else {
+    heroTag.textContent = 'Lifetime Participating-Loan Arbitrage (Spread Only)';
+    heroNum.textContent = calc_fmt(lifetimeNetSpread);
+    heroNum.className = 'calc-recapture-number' + (lifetimeNetSpread<0?' calc-negative':'');
+    heroSub.textContent = spread>=0
+      ? 'What your cash value earns above the loan cost while borrowed against — money working in two places.'
+      : 'At these rates the loan costs more than the index credits — a negative carry. This happens in flat index years.';
+  }
+
+  document.getElementById('calc-bankInterest').textContent = calc_fmt(lifetimeBankInterest);
+  document.getElementById('calc-recaptureAmt').textContent = calc_fmt(lifetimeVsBank);
+  const maxV = Math.max(lifetimeBankInterest, Math.abs(lifetimeVsBank)) || 1;
+  setTimeout(()=>{
+    document.getElementById('calc-bankBar').style.width = (lifetimeBankInterest/maxV*100)+'%';
+    const rb = document.getElementById('calc-recaptureBar');
+    rb.style.width = (Math.abs(lifetimeVsBank)/maxV*100)+'%';
+    rb.style.background = lifetimeVsBank<0 ? 'var(--rust)' : 'var(--ledger)';
+    rb.textContent = lifetimeVsBank<0 ? 'Negative' : 'Kept';
+  },150);
+
+  const rows = [
+    { label:'Amount borrowed per cycle', val: avgLoan },
+    { label:'Average outstanding balance', note:'≈55% of principal over an amortizing term', val: avgBal },
+    { label:'Index credit on borrowed balance / cycle', note:`${(iulRate*100).toFixed(1)}% over ${loanTerm} yrs (0% floor)`, val: iulCreditPerCycle },
+    { label:'Loan interest cost / cycle', note:`${(loanRate*100).toFixed(1)}% over ${loanTerm} yrs`, val: -iulLoanCostPerCycle },
+    { label:'Net spread per cycle', val: netSpreadPerCycle, highlight:true },
+    { label:`Lifetime net spread (× ${cycles} cycles)`, val: lifetimeNetSpread, highlight:true },
+  ];
+  if(view === 'bank'){
+    rows.push({ label:'Lifetime interest avoided (vs. bank)', note:`vs. an outside lender at ${(extRate*100).toFixed(1)}%`, val: lifetimeBankInterest, highlight:true });
+    rows.push({ label:'Total lifetime advantage vs. bank', val: lifetimeVsBank, total:true });
+  } else {
+    rows.push({ label:'Total lifetime arbitrage', val: lifetimeNetSpread, total:true });
+  }
+  document.getElementById('calc-breakdown').innerHTML = rows.map(r=>`
+    <div class="calc-bd-row ${r.highlight?'calc-highlight':''} ${r.total?'calc-total':''}">
+      <div class="calc-bd-label">${r.label}${r.note?`<span class="calc-bd-note">${r.note}</span>`:''}</div>
+      <div class="calc-bd-val">${r.val<0?'('+calc_fmt(Math.abs(r.val))+')':calc_fmt(r.val)}</div>
+    </div>
+  `).join('');
+
+  const warn = document.getElementById('calc-warnBox');
+  if(spread < 0){
+    warn.innerHTML = `<strong>Negative carry at these rates.</strong> Your loan rate (${(loanRate*100).toFixed(1)}%) currently exceeds the index credit (${(iulRate*100).toFixed(1)}%). This is exactly what happens in a flat index year with the 0% floor — the participating loan costs more than it earns. The strategy still recaptures interest you'd otherwise pay a bank, but the arbitrage itself works against you until index crediting recovers.`;
+  } else {
+    warn.innerHTML = `<strong>One honest note:</strong> This model shows the rate arbitrage but does not subtract cost of insurance and policy charges, which apply every year and are heaviest in years 1–10. A real carrier illustration will net these out. The positive spread shown assumes the index credits at ${(iulRate*100).toFixed(1)}% — in a flat year it credits 0% and the spread turns negative.`;
+  }
+
+  document.getElementById('calc-exampleBox').innerHTML = `
+    <div class="calc-ex-label">Your Scenario</div>
+    <p>Borrowing <span class="calc-ex-figure">${calc_fmt(avgLoan)}</span> for <span class="calc-ex-figure">${loanTerm} years</span>, repeated <span class="calc-ex-figure">${cycles} times</span>: your cash value keeps earning <span class="calc-ex-figure">${(iulRate*100).toFixed(1)}%</span> while the loan costs <span class="calc-ex-figure">${(loanRate*100).toFixed(1)}%</span> — a ${spread>=0?'positive':'negative'} spread of <span class="calc-ex-figure">${(spread>=0?'+':'−')+Math.abs(spread*100).toFixed(1)}%</span>. Versus paying a bank <span class="calc-ex-figure">${(extRate*100).toFixed(1)}%</span>, the estimated lifetime advantage is <strong>${calc_fmt(lifetimeVsBank)}</strong>${spread<0?' — note the participating-loan spread itself is negative at these rates, so the advantage comes entirely from avoiding the bank.':''}.</p>
+  `;
+}
+calc_recalc();
+
+</script>
 </body>
 </html>

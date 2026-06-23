@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estate Tax Exposure Analysis – Prince Financial Solutions</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:      #14171F;
+    --charcoal: #1F2430;
+    --slate:    #5C6370;
+    --hairline: #E2DFD6;
+    --paper:    #F7F5F0;
+    --bronze:   #9C7A3C;
+    --bronze-lt:#C9A65E;
+    --forest:   #2D5640;
+    --burgundy: #6B2A35;
+    --white:    #FFFFFF;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  /* ── Masthead ── */
+  .masthead {
+    background: var(--ink);
+    color: var(--white);
+    padding: 36px 24px 30px;
+    text-align: center;
+    border-bottom: 1px solid var(--bronze);
+    position: relative;
+  }
+  .masthead::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 50%;
+    transform: translateX(-50%);
+    width: 60px; height: 3px;
+    background: var(--bronze);
+  }
+  .masthead-eyebrow {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--bronze-lt);
+    margin-bottom: 12px;
+  }
+  .masthead h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 4.2vw, 34px);
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 10px;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .masthead p {
+    font-size: 13.5px;
+    color: #9AA0AC;
+    max-width: 460px;
+    margin: 0 auto;
+  }
+  .masthead-meta {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 18px;
+    font-size: 11px;
+    color: #6B7280;
+    letter-spacing: 0.5px;
+  }
+  .masthead-meta span { display: flex; align-items: center; gap: 6px; }
+  .meta-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--bronze); }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 32px 20px 48px; }
+
+  /* ── Section labels ── */
+  .section-num {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .section-num .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--bronze);
+    font-weight: 500;
+  }
+  .section-num .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--hairline);
+    border-radius: 4px;
+    padding: 30px 30px 26px;
+    margin-bottom: 22px;
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .card-subtitle { font-size: 13.5px; color: var(--slate); margin-bottom: 24px; max-width: 520px; }
+
+  /* ── Form fields ── */
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 540px) { .field-grid { grid-template-columns: 1fr; } }
+  .field { display: flex; flex-direction: column; gap: 7px; }
+  .field.full { grid-column: 1 / -1; }
+  label {
+    font-size: 11.5px; font-weight: 600; color: var(--slate);
+    text-transform: uppercase; letter-spacing: 0.6px;
+  }
+  .input-wrap { position: relative; }
+  .input-prefix {
+    position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+    font-size: 14px; color: var(--slate); font-weight: 500; pointer-events: none;
+  }
+  input[type="number"], select {
+    width: 100%; padding: 11px 13px 11px 28px;
+    border: 1.5px solid var(--hairline); border-radius: 3px;
+    font-size: 15px; font-family: 'JetBrains Mono', monospace;
+    color: var(--ink); background: var(--paper);
+    transition: border-color .2s, box-shadow .2s;
+  }
+  input[type="number"].no-prefix { padding-left: 13px; }
+  select { padding-left: 13px; cursor: pointer; font-family: 'Inter', sans-serif; }
+  input:focus, select:focus {
+    outline: none; border-color: var(--bronze);
+    box-shadow: 0 0 0 3px rgba(156,122,60,.12); background: var(--white);
+  }
+  .hint { font-size: 11px; color: #9AA0AA; margin-top: 1px; line-height: 1.4; }
+
+  .checkbox-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; background: var(--paper); border-radius: 3px;
+    border: 1.5px solid var(--hairline);
+  }
+  .checkbox-row input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--bronze); cursor: pointer; }
+  .checkbox-row label { text-transform: none; font-size: 13px; font-weight: 500; color: var(--ink); letter-spacing: 0; cursor: pointer; }
+
+  /* ── Buttons ── */
+  .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 26px; }
+  .btn {
+    padding: 12px 26px; border-radius: 3px; font-size: 13.5px; font-weight: 600;
+    cursor: pointer; border: none; transition: all .2s; font-family: 'Inter', sans-serif;
+    letter-spacing: 0.3px;
+  }
+  .btn-primary { background: var(--ink); color: var(--white); }
+  .btn-primary:hover { background: var(--bronze); }
+  .btn-ghost { background: transparent; color: var(--slate); border: 1.5px solid var(--hairline); }
+  .btn-ghost:hover { border-color: var(--slate); color: var(--ink); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── Formula block ── */
+  .formula-block {
+    background: var(--ink);
+    color: var(--white);
+    border-radius: 4px;
+    padding: 22px 26px;
+    margin: 18px 0 24px;
+    overflow-x: auto;
+  }
+  .formula-block .ftitle {
+    font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--bronze-lt); margin-bottom: 12px; font-weight: 600;
+  }
+  .formula-line {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    color: #E8E6E0;
+    line-height: 1.9;
+    white-space: pre;
+  }
+  .formula-line .op { color: var(--bronze-lt); }
+  .formula-line .eq { color: #6FCF97; }
+
+  /* ── Exposure summary ── */
+  .exposure-hero {
+    text-align: center;
+    padding: 8px 0 6px;
+  }
+  .exposure-hero .tag {
+    font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--slate); font-weight: 600; margin-bottom: 10px;
+  }
+  .exposure-number {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(38px, 7vw, 56px);
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .exposure-number.zero { color: var(--forest); }
+  .exposure-number.exposed { color: var(--burgundy); }
+  .exposure-sub { font-size: 13px; color: var(--slate); }
+
+  /* ── Breakdown table ── */
+  .breakdown-table { margin-top: 22px; }
+  .bt-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 11px 0; border-bottom: 1px solid var(--hairline);
+    font-size: 13.5px;
+  }
+  .bt-row:last-child { border-bottom: none; }
+  .bt-row.total {
+    border-top: 2px solid var(--ink); margin-top: 4px; padding-top: 14px;
+    font-weight: 700; font-size: 15px;
+  }
+  .bt-row.subtract .bt-val { color: var(--forest); }
+  .bt-row.tax .bt-val { color: var(--burgundy); font-weight: 700; }
+  .bt-label { color: var(--ink); }
+  .bt-label .bt-note { display: block; font-size: 11px; color: var(--slate); font-weight: 400; margin-top: 1px; }
+  .bt-val { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--ink); }
+
+  /* ── Comparison: Without Plan vs With Plan ── */
+  .compare-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px;
+  }
+  @media (max-width: 540px) { .compare-grid { grid-template-columns: 1fr; } }
+  .compare-col {
+    border-radius: 4px; padding: 22px 22px 20px; border: 1.5px solid var(--hairline);
+  }
+  .compare-col.without { background: #FBF4F2; border-color: #E8C9C3; }
+  .compare-col.with { background: #F2F7F4; border-color: #C9DDD0; }
+  .compare-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+  }
+  .compare-icon { font-size: 16px; }
+  .compare-head h4 {
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  .without .compare-head h4 { color: var(--burgundy); }
+  .with .compare-head h4 { color: var(--forest); }
+  .compare-list { display: flex; flex-direction: column; gap: 10px; }
+  .compare-item { display: flex; gap: 9px; font-size: 12.5px; color: var(--ink); line-height: 1.5; }
+  .compare-item .bullet { flex-shrink: 0; margin-top: 1px; font-size: 13px; }
+  .without .bullet { color: var(--burgundy); }
+  .with .bullet { color: var(--forest); }
+  .compare-figure {
+    margin-top: 16px; padding-top: 14px; border-top: 1px solid;
+    font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700;
+  }
+  .without .compare-figure { border-color: #E8C9C3; color: var(--burgundy); }
+  .with .compare-figure { border-color: #C9DDD0; color: var(--forest); }
+  .compare-figure-label { font-size: 10.5px; color: var(--slate); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-family: 'Inter',sans-serif; }
+
+  /* ── Strategy cards ── */
+  .strategy-grid { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+  .strategy-card {
+    border: 1px solid var(--hairline); border-radius: 4px; padding: 18px 20px;
+    background: var(--paper);
+    border-left: 3px solid var(--bronze);
+  }
+  .strategy-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 6px; }
+  .strategy-name { font-weight: 700; font-size: 14.5px; color: var(--ink); }
+  .strategy-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 10px; background: var(--ink); color: var(--white); white-space: nowrap;
+  }
+  .strategy-desc { font-size: 12.5px; color: var(--slate); line-height: 1.55; }
+  .strategy-benefit { font-size: 12px; color: var(--forest); font-weight: 600; margin-top: 8px; }
+
+  /* ── Example box ── */
+  .example-box {
+    background: var(--paper); border: 1px dashed var(--bronze);
+    border-radius: 4px; padding: 18px 20px; margin: 16px 0;
+  }
+  .example-box .ex-label {
+    font-size: 10.5px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--bronze); font-weight: 700; margin-bottom: 8px;
+  }
+  .example-box p { font-size: 13px; color: var(--ink); line-height: 1.6; }
+  .example-box .ex-figure { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--burgundy); }
+
+  /* ── CTA ── */
+  .cta-card {
+    background: var(--ink); border-radius: 4px; padding: 30px 32px; text-align: center; margin-top: 24px;
+    position: relative; overflow: hidden;
+  }
+  .cta-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--bronze);
+  }
+  .cta-card h3 { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--white); margin-bottom: 10px; }
+  .cta-card p { font-size: 13px; color: #9AA0AC; margin-bottom: 20px; max-width: 420px; margin-left: auto; margin-right: auto; }
+  .cta-btn {
+    display: inline-block; background: var(--bronze); color: var(--white); font-weight: 700;
+    font-size: 13.5px; padding: 14px 32px; border-radius: 3px; cursor: pointer; border: none;
+    font-family: 'Inter', sans-serif; transition: all .2s; text-decoration: none; letter-spacing: 0.4px;
+  }
+  .cta-btn:hover { background: var(--bronze-lt); }
+
+  .restart-link {
+    display: block; text-align: center; margin-top: 16px; font-size: 13px;
+    color: var(--slate); cursor: pointer; text-decoration: underline;
+  }
+  .restart-link:hover { color: var(--ink); }
+
+  .disclaimer {
+    font-size: 10.5px; color: #AAA; text-align: center; margin-top: 28px; line-height: 1.7;
+    max-width: 560px; margin-left: auto; margin-right: auto;
+  }
+
+  h3.section-title {
+    font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700;
+    color: var(--ink); margin: 30px 0 14px; padding-top: 22px; border-top: 1px solid var(--hairline);
+  }
+  h3.section-title:first-of-type { border-top: none; padding-top: 0; margin-top: 0; }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-eyebrow">Prince Financial Solutions · Wealth &amp; Legacy Planning</div>
+  <h1>Estate Tax Exposure Analysis</h1>
+  <p>A precise look at what federal and state estate tax could cost your estate — and the strategies sophisticated families use to keep it from happening.</p>
+  <div class="masthead-meta">
+    <span><span class="meta-dot"></span>2026 Tax Tables</span>
+    <span><span class="meta-dot"></span>$15M / $30M Exemption</span>
+    <span><span class="meta-dot"></span>40% Top Federal Rate</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ════════ STEP 1: ESTATE INPUTS ════════ -->
+  <div class="panel active" id="panel1">
+    <div class="section-num"><span class="num">01</span><span class="label">Estate Profile</span></div>
+    <div class="card">
+      <div class="card-title">Build Your Gross Estate</div>
+      <div class="card-subtitle">Include the fair market value of everything you own — real estate, business interests, investment accounts, retirement accounts, life insurance you control, and personal property.</div>
+
+      <div class="field-grid">
+        <div class="field">
+          <label for="realEstate">Real Estate (Primary + Other)</label>
+          <div class="input-wrap"><span class="input-prefix">$</span><input type="number" id="realEstate" min="0" value="3500000"></div>
+        </div>
+        <div class="field">
+          <label for="business">Business / Practice Interests</label>
+          <div class="input-wrap"><span class="input-prefix">$</span><input type="number" id="business" min="0" value="5000000"></div>
+        </div>
+        <div class="field">
+          <label for="investments">Investment &amp; Brokerage Accounts</label>
+          <div class="input-wrap"><span class="input-prefix">$</span><input type="number" id="investments" min="0" value="4000000"></div>
+        </div>
+        <div class="field">
+          <label for="retirement">Retirement Accounts (401k/IRA)</label>
+          <div class="input-wrap"><span class="input-prefix">$</span><input type="number" id="retirement" min="0" value="2000000"></div>
+        </div>
+        <div class="field">
+          <label for="lifeInsurance">Life Insurance Death Benefit (owned by you)</label>
+          <div class="input-wrap"><span class="input-prefix">$</span><input type="number" id="lifeInsurance" min="0" value="2000000"></div>
+          <div class="hint">If you own the policy, the full death benefit counts in your taxable estate.</div>
+        </div>
+        <div class="field">
+          <label for="otherAssets">Other Assets (art, collectibles, cash)</label>
+          <div class="input-wrap"><span class="input-prefix">$</span><input type="number" id="otherAssets" min="0" value="500000"></div>
+        </div>
+        <div class="field full">
+          <label for="debts">Outstanding Debts &amp; Final Expenses</label>
+          <div class="input-wrap"><span class="input-prefix">$</span><input type="number" id="debts" min="0" value="500000"></div>
+          <div class="hint">Mortgages, loans, estimated funeral and administration costs — these reduce the taxable estate.</div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="goTo(2)">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ STEP 2: FAMILY & STATE ════════ -->
+  <div class="panel" id="panel2">
+    <div class="section-num"><span class="num">02</span><span class="label">Family Structure &amp; Domicile</span></div>
+    <div class="card">
+      <div class="card-title">Marital Status &amp; State of Residence</div>
+      <div class="card-subtitle">Marital status determines whether the $15M exemption applies once or doubles via portability. State of residence determines whether a second layer of tax applies.</div>
+
+      <div class="field-grid">
+        <div class="field full">
+          <label>Marital Status</label>
+          <select id="maritalStatus" onchange="toggleSpouseFields()">
+            <option value="single">Single / Unmarried</option>
+            <option value="married" selected>Married</option>
+          </select>
+        </div>
+        <div class="field full" id="spouseExemptionField">
+          <label>Use Portability (Combine Both Exemptions)?</label>
+          <div class="checkbox-row">
+            <input type="checkbox" id="usePortability" checked>
+            <label for="usePortability">Yes — assume both spousal exemptions are preserved ($30M combined)</label>
+          </div>
+        </div>
+        <div class="field full">
+          <label for="stateResidence">State of Residence</label>
+          <select id="stateResidence">
+            <option value="none" selected>No state estate/inheritance tax</option>
+            <option value="MA">Massachusetts (exemption: $2M)</option>
+            <option value="OR">Oregon (exemption: $1M)</option>
+            <option value="MN">Minnesota (exemption: $3M)</option>
+            <option value="NY">New York (exemption: ~$7.16M, cliff applies)</option>
+            <option value="WA">Washington (exemption: ~$2.19M)</option>
+            <option value="IL">Illinois (exemption: $4M)</option>
+            <option value="CT">Connecticut (exemption: $15M, matches federal)</option>
+            <option value="MD">Maryland (exemption: $5M)</option>
+            <option value="other">Other state with estate tax</option>
+          </select>
+          <div class="hint">Georgia currently has no state estate or inheritance tax. This matters most if you own real estate or business interests in another state.</div>
+        </div>
+        <div class="field full">
+          <label for="priorGifts">Lifetime Taxable Gifts Already Made</label>
+          <div class="input-wrap"><span class="input-prefix">$</span><input type="number" id="priorGifts" min="0" value="0"></div>
+          <div class="hint">Gifts above the $19,000/year annual exclusion that used part of your lifetime exemption.</div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goTo(1)">← Back</button>
+        <button class="btn btn-primary" onclick="calculate()">Calculate My Exposure →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ STEP 3: RESULTS ════════ -->
+  <div class="panel" id="panel3">
+
+    <!-- Headline exposure -->
+    <div class="section-num"><span class="num">03</span><span class="label">Exposure Summary</span></div>
+    <div class="card">
+      <div class="exposure-hero">
+        <div class="tag">Estimated Net Estate Tax Liability</div>
+        <div class="exposure-number" id="exposureNumber">$0</div>
+        <div class="exposure-sub" id="exposureSub">on a gross estate of —</div>
+      </div>
+
+      <div class="breakdown-table" id="breakdownTable"></div>
+    </div>
+
+    <!-- Formula -->
+    <div class="card">
+      <div class="card-title">The Formula — Shown in Full</div>
+      <div class="card-subtitle">No black box. This is exactly how the federal estate tax is calculated under IRC §2001 and §2010.</div>
+      <div class="formula-block">
+        <div class="ftitle">Step-by-Step Calculation</div>
+<div class="formula-line">Gross Estate
+  <span class="op">−</span> Debts, Funeral &amp; Administration Costs
+  <span class="eq">=</span> Adjusted Gross Estate
+
+Adjusted Gross Estate
+  <span class="op">−</span> Marital / Charitable Deduction (if applicable)
+  <span class="eq">=</span> Taxable Estate
+
+Taxable Estate
+  <span class="op">+</span> Adjusted Taxable Gifts (lifetime gifts over annual exclusion)
+  <span class="eq">=</span> Tax Base
+
+Tax Base × Tentative Tax Rate (up to 40%)
+  <span class="op">−</span> Applicable Credit Amount (offsets $15M/$30M exemption)
+  <span class="eq">=</span> Federal Estate Tax Due
+
+  <span class="op">+</span> State Estate/Inheritance Tax (if domiciled in a taxing state)
+  <span class="eq">=</span> Total Estate Tax Liability</div>
+      </div>
+
+      <div class="example-box">
+        <div class="ex-label">Worked Example</div>
+        <p>A married couple with a <span class="ex-figure">$22,000,000</span> combined estate, using full portability, shelters <span class="ex-figure">$30,000,000</span> under the 2026 exemption. <strong>Taxable estate: $0. Tax owed: $0.</strong> But if that same couple owns a $6M vacation property in a state like Oregon (exemption: $1M) titled only in one spouse's name, that state alone could trigger six figures of state-level tax — even though no federal tax is owed.</p>
+      </div>
+    </div>
+
+    <!-- Without Plan vs With Plan -->
+    <div class="card">
+      <div class="card-title">The Cost of Doing Nothing vs. The Value of a Plan</div>
+      <div class="card-subtitle">Two paths from today to settlement. Same estate. Very different outcomes for your heirs.</div>
+
+      <div class="compare-grid">
+        <div class="compare-col without">
+          <div class="compare-head"><span class="compare-icon">⚠️</span><h4>Without a Plan</h4></div>
+          <div class="compare-list" id="withoutList"></div>
+          <div class="compare-figure-label">Estimated Cost to Heirs</div>
+          <div class="compare-figure" id="withoutFigure">$0</div>
+        </div>
+        <div class="compare-col with">
+          <div class="compare-head"><span class="compare-icon">✓</span><h4>With a Coordinated Plan</h4></div>
+          <div class="compare-list" id="withList"></div>
+          <div class="compare-figure-label">Potential Tax Reduction</div>
+          <div class="compare-figure" id="withFigure">$0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Strategies -->
+    <div class="card">
+      <div class="card-title">Strategies That Apply to Your Situation</div>
+      <div class="card-subtitle">Generated based on your estate composition. These are the tools sophisticated families and their advisors use to reduce or eliminate estate tax exposure.</div>
+      <div class="strategy-grid" id="strategyGrid"></div>
+    </div>
+
+    <!-- Other advantages -->
+    <div class="card">
+      <div class="card-title">Beyond Tax Reduction — Other Advantages of Planning Now</div>
+      <div class="strategy-grid">
+        <div class="strategy-card">
+          <div class="strategy-head"><span class="strategy-name">Probate Avoidance</span><span class="strategy-tag">Speed</span></div>
+          <div class="strategy-desc">Assets properly titled in a revocable or irrevocable trust bypass probate entirely — heirs receive assets in weeks, not the 9–24 months typical of probate court.</div>
+        </div>
+        <div class="strategy-card">
+          <div class="strategy-head"><span class="strategy-name">Privacy</span><span class="strategy-tag">Control</span></div>
+          <div class="strategy-desc">Wills become public record through probate. Trusts remain private — your family's financial affairs stay out of the courthouse and away from public databases.</div>
+        </div>
+        <div class="strategy-card">
+          <div class="strategy-head"><span class="strategy-name">Creditor &amp; Divorce Protection</span><span class="strategy-tag">Asset Protection</span></div>
+          <div class="strategy-desc">Properly structured irrevocable trusts can shield inherited wealth from a beneficiary's creditors, lawsuits, or a future divorcing spouse.</div>
+        </div>
+        <div class="strategy-card">
+          <div class="strategy-head"><span class="strategy-name">Incapacity Planning</span><span class="strategy-tag">Protection</span></div>
+          <div class="strategy-desc">A funded revocable trust with a successor trustee provision means your affairs are managed seamlessly if you become incapacitated — no court-supervised guardianship needed.</div>
+        </div>
+        <div class="strategy-card">
+          <div class="strategy-head"><span class="strategy-name">Multi-Generational Control</span><span class="strategy-tag">Legacy</span></div>
+          <div class="strategy-desc">Dynasty trusts and staggered distribution provisions let you dictate how and when heirs receive wealth — protecting against poor decisions at 18, 21, or 25.</div>
+        </div>
+        <div class="strategy-card">
+          <div class="strategy-head"><span class="strategy-name">Business Continuity</span><span class="strategy-tag">Succession</span></div>
+          <div class="strategy-desc">Buy-sell agreements funded by life insurance, paired with valuation discounting strategies, prevent forced liquidation of a family business to pay estate taxes.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-card">
+      <h3>Your Numbers Are Estimates. Your Plan Should Not Be.</h3>
+      <p>This analysis is a starting point. A coordinated estate plan — built with your attorney, CPA, and Jitendra at Prince Financial Solutions — can convert this exposure into a structured legacy strategy.</p>
+      <a class="cta-btn" href="https://princefinancialsolutions.com" target="_blank">Schedule a Private Estate Strategy Session</a>
+    </div>
+
+    <a class="restart-link" onclick="restart()">← Recalculate with Different Figures</a>
+
+    <p class="disclaimer">
+      This tool provides educational estimates based on 2026 federal estate tax tables ($15M individual / $30M married exemption, 40% top marginal rate) and is not legal, tax, or financial advice. 
+      State estate tax figures are simplified approximations and exemption thresholds, rates, and "cliff" rules vary and change. Actual estate tax liability depends on asset titling, valuation discounts, 
+      trust structures already in place, and final IRS/state determinations. Consult a qualified estate planning attorney and CPA before making decisions. © Prince Financial Solutions.
+    </p>
+  </div>
+
+</div>
+
+<script>
+function val(id) { return parseFloat(document.getElementById(id).value) || 0; }
+function fmt(n) {
+  const sign = n < 0 ? '−' : '';
+  n = Math.abs(n);
+  if (n >= 1e6) return sign + '$' + (n/1e6).toFixed(2) + 'M';
+  return sign + '$' + Math.round(n).toLocaleString();
+}
+function fmtFull(n) { return '$' + Math.round(n).toLocaleString(); }
+
+let currentStep = 1;
+function goTo(step) {
+  document.getElementById('panel' + currentStep).classList.remove('active');
+  document.getElementById('panel' + step).classList.add('active');
+  currentStep = step;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function restart() { goTo(1); }
+
+function toggleSpouseFields() {
+  const married = document.getElementById('maritalStatus').value === 'married';
+  document.getElementById('spouseExemptionField').style.display = married ? 'flex' : 'none';
+}
+
+// 2026 federal constants
+const FED_EXEMPTION_SINGLE = 15000000;
+const FED_RATE = 0.40;
+const ANNUAL_EXCLUSION = 19000;
+
+// Simplified state exemption table (illustrative)
+const STATE_TABLE = {
+  none: { exemption: Infinity, rate: 0, name: 'No state estate tax' },
+  MA:   { exemption: 2000000, rate: 0.13, name: 'Massachusetts' },
+  OR:   { exemption: 1000000, rate: 0.16, name: 'Oregon' },
+  MN:   { exemption: 3000000, rate: 0.16, name: 'Minnesota' },
+  NY:   { exemption: 7160000, rate: 0.16, name: 'New York', cliff: true },
+  WA:   { exemption: 2190000, rate: 0.20, name: 'Washington' },
+  IL:   { exemption: 4000000, rate: 0.16, name: 'Illinois' },
+  CT:   { exemption: 15000000, rate: 0.12, name: 'Connecticut' },
+  MD:   { exemption: 5000000, rate: 0.16, name: 'Maryland' },
+  other:{ exemption: 2000000, rate: 0.15, name: 'Other state (estimate)' }
+};
+
+function calculate() {
+  const realEstate    = val('realEstate');
+  const business       = val('business');
+  const investments     = val('investments');
+  const retirement      = val('retirement');
+  const lifeInsurance   = val('lifeInsurance');
+  const otherAssets     = val('otherAssets');
+  const debts           = val('debts');
+  const priorGifts      = val('priorGifts');
+
+  const grossEstate = realEstate + business + investments + retirement + lifeInsurance + otherAssets;
+  const adjustedGrossEstate = Math.max(0, grossEstate - debts);
+  const taxableEstate = adjustedGrossEstate; // no marital deduction modeling at this simplified level (assume single decedent perspective)
+  const taxBase = taxableEstate + priorGifts;
+
+  const married = document.getElementById('maritalStatus').value === 'married';
+  const portability = document.getElementById('usePortability').checked;
+  const exemption = married && portability ? FED_EXEMPTION_SINGLE * 2 : FED_EXEMPTION_SINGLE;
+
+  const federalTaxableAmount = Math.max(0, taxBase - exemption);
+  const federalTax = federalTaxableAmount * FED_RATE;
+
+  // State tax (simplified, applied as if estate is domiciled in that state, separate exemption)
+  const stateKey = document.getElementById('stateResidence').value;
+  const stateInfo = STATE_TABLE[stateKey];
+  let stateTax = 0;
+  let stateTaxableAmount = 0;
+  if (stateInfo.exemption !== Infinity) {
+    stateTaxableAmount = Math.max(0, taxableEstate - stateInfo.exemption);
+    stateTax = stateTaxableAmount * stateInfo.rate;
+  }
+
+  const totalTax = federalTax + stateTax;
+
+  renderResults({
+    grossEstate, debts, adjustedGrossEstate, taxableEstate, priorGifts, taxBase,
+    exemption, federalTaxableAmount, federalTax,
+    stateInfo, stateTaxableAmount, stateTax, totalTax,
+    married, lifeInsurance, business, realEstate
+  });
+
+  goTo(3);
+}
+
+function renderResults(d) {
+  const exposureEl = document.getElementById('exposureNumber');
+  const exposureSub = document.getElementById('exposureSub');
+
+  if (d.totalTax <= 0) {
+    exposureEl.textContent = '$0';
+    exposureEl.className = 'exposure-number zero';
+  } else {
+    exposureEl.textContent = fmt(d.totalTax);
+    exposureEl.className = 'exposure-number exposed';
+  }
+  exposureSub.textContent = `on a gross estate of ${fmtFull(d.grossEstate)}`;
+
+  // Breakdown table
+  const rows = [
+    { label: 'Gross Estate', note: 'Real estate, business, investments, retirement, life insurance, other assets', val: d.grossEstate },
+    { label: 'Less: Debts & Final Expenses', val: -d.debts, subtract: true },
+    { label: 'Adjusted Gross Estate', val: d.adjustedGrossEstate, bold: true },
+    { label: 'Plus: Adjusted Taxable Gifts', note: 'Lifetime gifts exceeding annual exclusions', val: d.priorGifts },
+    { label: 'Tax Base', val: d.taxBase, bold: true },
+    { label: `Less: Applicable Exemption (${d.married ? 'Married, ' : ''}2026)`, note: d.married ? 'Using portability — $30M combined' : 'Single — $15M', val: -d.exemption, subtract: true },
+    { label: 'Federal Taxable Amount', val: d.federalTaxableAmount, bold: true },
+    { label: 'Federal Estate Tax (40%)', val: d.federalTax, tax: true },
+  ];
+  if (d.stateInfo.exemption !== Infinity) {
+    rows.push({ label: `State Estate Tax (${d.stateInfo.name})`, note: `Exemption: ${fmt(d.stateInfo.exemption)}, Rate: ${(d.stateInfo.rate*100).toFixed(0)}%`, val: d.stateTax, tax: true });
+  }
+  rows.push({ label: 'Total Estate Tax Liability', val: d.totalTax, total: true });
+
+  document.getElementById('breakdownTable').innerHTML = rows.map(r => `
+    <div class="bt-row ${r.subtract ? 'subtract' : ''} ${r.tax ? 'tax' : ''} ${r.total ? 'total' : ''}">
+      <div class="bt-label">${r.label}${r.note ? `<span class="bt-note">${r.note}</span>` : ''}</div>
+      <div class="bt-val">${r.val < 0 ? '(' + fmtFull(Math.abs(r.val)) + ')' : fmtFull(r.val)}</div>
+    </div>
+  `).join('');
+
+  // Without plan vs with plan
+  const withoutItems = [
+    { text: `<strong>${fmt(d.totalTax)}</strong> paid in cash, due within 9 months of death` },
+    { text: 'Estate may be forced to liquidate real estate or business interests at a discount to raise cash' },
+    { text: 'Assets pass through probate — public record, 9–24 months, legal fees' },
+    { text: 'Heirs receive a lump sum with no protection from creditors, lawsuits, or divorce' },
+  ];
+  if (d.business > 0) withoutItems.push({ text: 'Family business may need to be sold or heavily leveraged to cover the tax bill' });
+
+  const withItems = [
+    { text: 'Irrevocable trust structures move future appreciation outside the taxable estate' },
+    { text: 'Life insurance held in an ILIT delivers tax-free liquidity exactly when it\'s needed — no fire sale' },
+    { text: 'Assets bypass probate entirely — private, fast, lower cost' },
+    { text: 'Distributions can be staggered and creditor-protected for each heir' },
+  ];
+  if (d.business > 0) withItems.push({ text: 'Valuation discounting (FLP/FLLC) can reduce the taxable value of business interests by 20–35%' });
+
+  document.getElementById('withoutList').innerHTML = withoutItems.map(i => `<div class="compare-item"><span class="bullet">−</span><span>${i.text}</span></div>`).join('');
+  document.getElementById('withList').innerHTML = withItems.map(i => `<div class="compare-item"><span class="bullet">✓</span><span>${i.text}</span></div>`).join('');
+
+  document.getElementById('withoutFigure').textContent = fmt(d.totalTax);
+
+  // Estimate potential reduction (illustrative — assumes well-structured plan eliminates 60-100% depending on size)
+  let reductionPct = 0.85;
+  if (d.totalTax === 0) reductionPct = 0;
+  const potentialSavings = d.totalTax * reductionPct;
+  document.getElementById('withFigure').textContent = d.totalTax > 0 ? fmt(potentialSavings) + ' potential' : '$0 — already efficient';
+
+  // Strategy cards
+  const strategies = [];
+
+  if (d.totalTax > 0 || d.grossEstate > 10000000) {
+    strategies.push({
+      name: 'Irrevocable Life Insurance Trust (ILIT)',
+      tag: 'Liquidity',
+      desc: 'Life insurance is purchased and owned by the trust, not you — removing the death benefit from your taxable estate entirely while providing heirs immediate, tax-free cash to pay any remaining estate tax.',
+      benefit: `Removes ${fmt(d.lifeInsurance)} in death benefit from the taxable estate.`
+    });
+  }
+  if (d.business > 0) {
+    strategies.push({
+      name: 'Family Limited Partnership / LLC with Valuation Discounts',
+      tag: 'Valuation',
+      desc: 'Transferring business or real estate interests into an FLP/FLLC and gifting non-controlling, non-marketable interests to heirs can result in IRS-recognized discounts of 20–35% on the transferred value.',
+      benefit: `Could reduce the taxable value of your ${fmt(d.business)} in business interests by $${Math.round(d.business*0.25/1000)}K–$${Math.round(d.business*0.35/1000)}K.`
+    });
+  }
+  if (d.grossEstate - d.exemption > 0) {
+    strategies.push({
+      name: 'Spousal Lifetime Access Trust (SLAT)',
+      tag: 'Gifting',
+      desc: 'One spouse gifts assets into an irrevocable trust for the benefit of the other spouse and descendants — using the $15M exemption now while it\'s available, removing future growth from the estate, while the donor spouse retains indirect access.',
+      benefit: 'Locks in today\'s historically high exemption before any future legislative reduction.'
+    });
+    strategies.push({
+      name: 'Intentionally Defective Grantor Trust (IDGT)',
+      tag: 'Freeze',
+      desc: 'You sell appreciating assets (like business interests or real estate) to the trust in exchange for a promissory note. Future appreciation accrues outside your estate, and because it\'s a "defective" grantor trust, you pay the income tax — which is itself an additional tax-free gift to heirs.',
+      benefit: 'Freezes the value of transferred assets for estate tax purposes while you absorb the income tax burden.'
+    });
+  }
+  strategies.push({
+    name: 'Annual Exclusion Gifting',
+    tag: 'Foundational',
+    desc: `Gift up to $19,000 per recipient per year ($38,000 if married, gift-splitting) with no gift tax return required and no use of your lifetime exemption.`,
+    benefit: 'A couple with 3 children and 6 grandchildren could move $342,000/year out of the estate, gift-tax-free.'
+  });
+  if (d.totalTax > 0) {
+    strategies.push({
+      name: 'Charitable Remainder Trust (CRT) / Charitable Lead Trust (CLT)',
+      tag: 'Philanthropy',
+      desc: 'Donate appreciated assets to an irrevocable trust, receive an income stream (CRT) or have the charity receive income first (CLT), and pass the remainder to heirs or charity with significant estate and income tax benefits.',
+      benefit: 'Combines a current income tax deduction with reduced estate tax exposure and a philanthropic legacy.'
+    });
+  }
+  strategies.push({
+    name: 'Dynasty Trust / Generation-Skipping Trust',
+    tag: 'Multi-Gen',
+    desc: 'Structures wealth transfer to skip a generation\'s estate tax entirely, using your GST exemption (also $15M in 2026) to benefit grandchildren and beyond, often protected for decades or in perpetuity depending on state law.',
+    benefit: 'Avoids estate tax being assessed twice — once at your passing, again at your children\'s.'
+  });
+
+  document.getElementById('strategyGrid').innerHTML = strategies.map(s => `
+    <div class="strategy-card">
+      <div class="strategy-head"><span class="strategy-name">${s.name}</span><span class="strategy-tag">${s.tag}</span></div>
+      <div class="strategy-desc">${s.desc}</div>
+      <div class="strategy-benefit">→ ${s.benefit}</div>
+    </div>
+  `).join('');
+}
+
+toggleSpouseFields();
+</script>
+</body>
+</html>

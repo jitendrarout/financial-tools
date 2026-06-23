@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zero-Tax Bucket Strategy – Prince Financial Solutions</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:      #0E2A24;
+    --charcoal: #16332C;
+    --slate:    #54655F;
+    --hairline: #DCE6DF;
+    --paper:    #F6F8F4;
+    --teal:     #1B6E5C;
+    --teal-lt:  #2F9A80;
+    --gold:     #B8893B;
+    --gold-lt:  #DCB46B;
+    --amber:    #C97A2B;
+    --rose:     #A8453B;
+    --white:    #FFFFFF;
+  }
+
+  body { font-family: 'Inter', sans-serif; background: var(--paper); color: var(--ink); line-height: 1.5; }
+
+  .masthead {
+    background: var(--ink); color: var(--white); padding: 36px 24px 28px; text-align: center;
+    border-bottom: 3px solid var(--gold); position: relative;
+  }
+  .masthead-eyebrow { font-size: 10.5px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--gold-lt); margin-bottom: 12px; }
+  .masthead h1 { font-family: 'Playfair Display', serif; font-size: clamp(24px, 4.2vw, 33px); font-weight: 800; line-height: 1.25; margin-bottom: 10px; max-width: 580px; margin: 0 auto 10px; }
+  .masthead p { font-size: 13.5px; color: #A9C2BA; max-width: 480px; margin: 0 auto; }
+
+  .container { max-width: 780px; margin: 0 auto; padding: 28px 20px 48px; }
+
+  /* Profile toggle */
+  .profile-toggle {
+    display: flex; gap: 0; background: var(--white); border: 1.5px solid var(--hairline);
+    border-radius: 10px; padding: 5px; margin-bottom: 24px;
+  }
+  .profile-btn {
+    flex: 1; padding: 14px 10px; text-align: center; border: none; background: transparent;
+    cursor: pointer; border-radius: 7px; transition: all .2s; font-family: 'Inter', sans-serif;
+  }
+  .profile-btn .pname { font-size: 14px; font-weight: 700; color: var(--slate); display: block; margin-bottom: 2px; }
+  .profile-btn .pdesc { font-size: 11px; color: #9AA8A2; display: block; }
+  .profile-btn.active { background: var(--teal); }
+  .profile-btn.active .pname { color: var(--white); }
+  .profile-btn.active .pdesc { color: #C8E0D8; }
+
+  .section-num { display: flex; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+  .section-num .num { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--teal); font-weight: 500; }
+  .section-num .label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--slate); }
+
+  .card { background: var(--white); border: 1px solid var(--hairline); border-radius: 4px; padding: 28px 28px 24px; margin-bottom: 20px; }
+  .card-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+  .card-subtitle { font-size: 13px; color: var(--slate); margin-bottom: 20px; max-width: 540px; }
+
+  /* Bucket priority ladder */
+  .ladder { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+  .ladder-row {
+    display: flex; align-items: stretch; gap: 0; border-radius: 6px; overflow: hidden;
+    border: 1px solid var(--hairline);
+  }
+  .ladder-rank {
+    width: 44px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif; font-weight: 800; font-size: 18px; color: var(--white);
+  }
+  .ladder-rank.zero { background: var(--teal); }
+  .ladder-rank.deferred { background: var(--gold); }
+  .ladder-rank.taxable { background: var(--rose); }
+  .ladder-row.featured { border: 2px solid var(--amber); box-shadow: 0 2px 14px rgba(201,122,43,.18); }
+  .ladder-row.featured .ladder-rank.zero { background: var(--amber); }
+  .ladder-row.featured .ladder-body { background: #FDF6EC; }
+  .ladder-row.featured .ladder-amt { background: #FCEFDB; border-left-color: #EBD3AC; }
+  .featured-star { font-size: 11px; color: var(--amber); margin-left: 6px; }
+  .ladder-body { flex: 1; padding: 12px 16px; background: var(--white); }
+  .ladder-name { font-weight: 700; font-size: 13.5px; color: var(--ink); margin-bottom: 2px; }
+  .ladder-tag {
+    display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 8px; margin-left: 7px; vertical-align: middle;
+  }
+  .tag-zero { background: #DCF0E8; color: var(--teal); }
+  .tag-deferred { background: #F5E6CC; color: var(--gold); }
+  .tag-taxable { background: #F2DCDA; color: var(--rose); }
+  .ladder-desc { font-size: 12px; color: var(--slate); line-height: 1.5; }
+  .ladder-amt {
+    flex-shrink: 0; width: 130px; display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 15px; color: var(--ink);
+    background: var(--paper); border-left: 1px solid var(--hairline);
+  }
+  @media (max-width: 560px) {
+    .ladder-row { flex-wrap: wrap; }
+    .ladder-amt { width: 100%; border-left: none; border-top: 1px solid var(--hairline); }
+  }
+
+  /* Bucket bar visualization */
+  .bucket-viz { margin-top: 24px; }
+  .bucket-viz h3 { font-size: 13.5px; font-weight: 700; color: var(--ink); margin-bottom: 12px; }
+  .bucket-bar-wrap { display: flex; height: 38px; border-radius: 8px; overflow: hidden; border: 1px solid var(--hairline); }
+  .bucket-seg { display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 700; color: var(--white); transition: width 1s ease; white-space: nowrap; overflow: hidden; }
+  .bucket-seg.zero { background: var(--teal); }
+  .bucket-seg.deferred { background: var(--gold); }
+  .bucket-seg.taxable { background: var(--rose); }
+  .bucket-legend { display: flex; gap: 18px; margin-top: 10px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--slate); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+  /* Allocation table */
+  .alloc-table { margin-top: 20px; }
+  .alloc-row { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--hairline); font-size: 13px; }
+  .alloc-row:last-child { border-bottom: none; }
+  .alloc-row.total { border-top: 2px solid var(--ink); margin-top: 4px; padding-top: 12px; font-weight: 700; font-size: 14.5px; }
+  .alloc-label { color: var(--ink); }
+  .alloc-label .alloc-note { display: block; font-size: 10.5px; color: var(--slate); font-weight: 400; margin-top: 1px; }
+  .alloc-val { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--ink); }
+
+  /* Phase cards */
+  .phase-header { display: flex; align-items: center; gap: 10px; margin: 0 0 16px; }
+  .phase-icon { font-size: 20px; }
+  .phase-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--ink); }
+
+  .strategy-grid { display: flex; flex-direction: column; gap: 12px; }
+  .strategy-card { border: 1px solid var(--hairline); border-radius: 4px; padding: 16px 18px; background: var(--paper); border-left: 3px solid var(--teal); }
+  .strategy-card.deferred-card { border-left-color: var(--gold); }
+  .strategy-card.taxable-card { border-left-color: var(--rose); }
+  .strategy-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 5px; }
+  .strategy-name { font-weight: 700; font-size: 13.5px; color: var(--ink); }
+  .strategy-tag { font-size: 9.5px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; padding: 3px 8px; border-radius: 10px; background: var(--ink); color: var(--white); white-space: nowrap; }
+  .strategy-desc { font-size: 12px; color: var(--slate); line-height: 1.5; }
+  .strategy-benefit { font-size: 11.5px; color: var(--teal); font-weight: 600; margin-top: 6px; }
+  .strategy-figure { font-size: 11.5px; color: var(--ink); font-weight: 700; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+
+  .divider-label {
+    display: flex; align-items: center; gap: 12px; margin: 28px 0 16px;
+  }
+  .divider-label .dl-text { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--teal); white-space: nowrap; }
+  .divider-label .dl-line { flex: 1; height: 1px; background: var(--hairline); }
+
+  .example-box { background: var(--paper); border: 1px dashed var(--gold); border-radius: 4px; padding: 16px 18px; margin: 14px 0; }
+  .example-box .ex-label { font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--gold); font-weight: 700; margin-bottom: 7px; }
+  .example-box p { font-size: 12.5px; color: var(--ink); line-height: 1.6; }
+  .example-box .ex-figure { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--teal); }
+
+  .formula-block { background: var(--ink); color: var(--white); border-radius: 4px; padding: 20px 24px; margin: 16px 0 20px; overflow-x: auto; }
+  .formula-block .ftitle { font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--gold-lt); margin-bottom: 10px; font-weight: 600; }
+  .formula-line { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #E4ECE7; line-height: 1.85; white-space: pre; }
+  .formula-line .op { color: var(--gold-lt); }
+  .formula-line .eq { color: #6FCF97; }
+
+  .cta-card { background: var(--ink); border-radius: 4px; padding: 28px 30px; text-align: center; margin-top: 22px; position: relative; overflow: hidden; }
+  .cta-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gold); }
+  .cta-card h3 { font-family: 'Playfair Display', serif; font-size: 21px; color: var(--white); margin-bottom: 9px; }
+  .cta-card p { font-size: 12.5px; color: #A9C2BA; margin-bottom: 18px; max-width: 420px; margin-left: auto; margin-right: auto; }
+  .cta-btn { display: inline-block; background: var(--gold); color: var(--ink); font-weight: 700; font-size: 13px; padding: 13px 30px; border-radius: 3px; cursor: pointer; border: none; font-family: 'Inter', sans-serif; transition: all .2s; text-decoration: none; letter-spacing: 0.4px; }
+  .cta-btn:hover { background: var(--gold-lt); }
+
+  .disclaimer { font-size: 10px; color: #A2A89E; text-align: center; margin-top: 24px; line-height: 1.65; max-width: 580px; margin-left: auto; margin-right: auto; }
+
+  .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 6px; }
+
+  /* IUL Spotlight */
+  .iul-spotlight {
+    background: linear-gradient(135deg, #1B1410 0%, #2B2014 100%);
+    border-radius: 6px; padding: 26px 28px; margin-top: 18px; position: relative; overflow: hidden;
+  }
+  .iul-spotlight::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--amber); }
+  .iul-spotlight-eyebrow { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-lt); font-weight: 700; margin-bottom: 8px; }
+  .iul-spotlight h3 { font-family: 'Playfair Display', serif; font-size: 19px; color: var(--white); margin-bottom: 10px; }
+  .iul-spotlight p.lead { font-size: 12.5px; color: #D8C9AE; line-height: 1.6; margin-bottom: 18px; max-width: 560px; }
+  .iul-benefit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 540px) { .iul-benefit-grid { grid-template-columns: 1fr; } }
+  .iul-benefit {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 5px;
+    padding: 13px 15px;
+  }
+  .iul-benefit .ib-title { font-size: 12.5px; font-weight: 700; color: var(--gold-lt); margin-bottom: 4px; }
+  .iul-benefit .ib-desc { font-size: 11.5px; color: #C2B6A0; line-height: 1.5; }
+  .iul-allocation-note {
+    margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.12);
+    font-size: 12px; color: #D8C9AE; line-height: 1.55;
+  }
+  .iul-allocation-note strong { color: var(--gold-lt); }
+  @media (max-width: 480px) { .input-row { grid-template-columns: 1fr; } }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  label { font-size: 11px; font-weight: 600; color: var(--slate); text-transform: uppercase; letter-spacing: 0.5px; }
+  .input-wrap { position: relative; }
+  .input-prefix { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--slate); font-weight: 500; pointer-events: none; }
+  input[type="number"] { width: 100%; padding: 10px 12px 10px 26px; border: 1.5px solid var(--hairline); border-radius: 6px; font-size: 14px; font-family: 'JetBrains Mono', monospace; color: var(--ink); background: var(--paper); }
+  input[type="number"]:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px rgba(27,110,92,.1); background: var(--white); }
+  .btn { padding: 11px 22px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; background: var(--teal); color: var(--white); font-family: 'Inter', sans-serif; transition: all .2s; }
+  .btn:hover { background: var(--teal-lt); }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-eyebrow">Prince Financial Solutions · Wealth &amp; Legacy Planning</div>
+  <h1>The Zero-Tax Bucket Strategy</h1>
+  <p>Where to put the next dollar — before and after retirement — to pay the least tax legally possible, for life.</p>
+</div>
+
+<div class="container">
+
+  <!-- Profile Toggle -->
+  <div class="profile-toggle">
+    <button class="profile-btn active" id="btnFamily" onclick="setProfile('family')">
+      <span class="pname">Working Family</span>
+      <span class="pdesc">$200K household income</span>
+    </button>
+    <button class="profile-btn" id="btnHnw" onclick="setProfile('hnw')">
+      <span class="pname">High Net Worth</span>
+      <span class="pdesc">$5M+ estate, complex income</span>
+    </button>
+  </div>
+
+  <!-- ════ Income input ════ -->
+  <div class="section-num"><span class="num">01</span><span class="label">Your Numbers</span></div>
+  <div class="card">
+    <div class="card-title" id="incomeCardTitle">Household Income &amp; Savings Capacity</div>
+    <div class="card-subtitle" id="incomeCardSubtitle">Tell us what's available to save each year — we'll show you the optimal order to fill each bucket.</div>
+
+    <div class="input-row">
+      <div class="field">
+        <label for="annualIncome">Annual Household Income</label>
+        <div class="input-wrap"><span class="input-prefix">$</span><input type="number" id="annualIncome" min="0" value="200000" oninput="recalc()"></div>
+      </div>
+      <div class="field">
+        <label for="annualSavings">Annual Amount Available to Save/Invest</label>
+        <div class="input-wrap"><span class="input-prefix">$</span><input type="number" id="annualSavings" min="0" value="30000" oninput="recalc()"></div>
+      </div>
+    </div>
+    <div class="input-row" id="hnwExtraInputs" style="display:none;">
+      <div class="field">
+        <label for="liquidNetWorth">Investable / Liquid Net Worth</label>
+        <div class="input-wrap"><span class="input-prefix">$</span><input type="number" id="liquidNetWorth" min="0" value="6000000" oninput="recalc()"></div>
+      </div>
+      <div class="field">
+        <label for="age">Current Age</label>
+        <div class="input-wrap"><input type="number" id="age" min="25" max="80" value="52" oninput="recalc()" style="padding-left:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ Priority Ladder ════ -->
+  <div class="section-num"><span class="num">02</span><span class="label">The Fill Order</span></div>
+  <div class="card">
+    <div class="card-title">Always Prioritize Zero-Tax First</div>
+    <div class="card-subtitle">Fill buckets top to bottom. Each one is more tax-efficient than the next — don't move to a lower-priority bucket until the one above it is full or unavailable to you.</div>
+
+    <div class="ladder" id="ladderContainer"></div>
+
+    <div class="bucket-viz">
+      <h3>Where Your Next Dollar Should Go</h3>
+      <div class="bucket-bar-wrap" id="bucketBar"></div>
+      <div class="bucket-legend">
+        <div class="legend-item"><span class="legend-dot" style="background:var(--teal);"></span>Zero-Tax Bucket</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--gold);"></span>Tax-Deferred Bucket</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--rose);"></span>Taxable Bucket</div>
+      </div>
+    </div>
+
+    <div class="iul-spotlight" id="iulSpotlight"></div>
+
+    <div class="alloc-table" id="allocTable"></div>
+  </div>
+
+  <!-- ════ Formula ════ -->
+  <div class="card">
+    <div class="card-title">The Formula</div>
+    <div class="card-subtitle">How "zero or low tax" actually gets calculated, bucket by bucket.</div>
+    <div class="formula-block">
+      <div class="ftitle">Effective Lifetime Tax Rate by Bucket</div>
+<div class="formula-line">Zero-Tax Bucket (Roth, HSA, Muni, Cash-Value Life):
+  Contribution (after-tax or qualifying) <span class="op">+</span> Tax-Free Growth <span class="eq">=</span> Tax-Free Withdrawal
+
+Tax-Deferred Bucket (401k, Traditional IRA):
+  Pre-Tax Contribution <span class="op">+</span> Tax-Deferred Growth
+  <span class="eq">=</span> Withdrawal × Ordinary Income Rate <span class="op">=</span> Tax Owed Later
+
+Taxable Bucket (Brokerage):
+  After-Tax Contribution <span class="op">+</span> Growth
+  <span class="eq">=</span> Dividends/Realized Gains × Cap Gains Rate <span class="op">=</span> Tax Owed Annually</div>
+    </div>
+    <div class="example-box" id="exampleBox"></div>
+  </div>
+
+  <!-- ════ BEFORE RETIREMENT ════ -->
+  <div class="card">
+    <div class="phase-header"><span class="phase-icon">🌱</span><span class="phase-title">Before Retirement — Accumulation Phase</span></div>
+    <div class="card-subtitle">The goal here is twofold: lower today's taxable income where it helps, and build the tax-free bucket as large as possible while you have decades of growth ahead of it.</div>
+    <div class="strategy-grid" id="beforeStrategies"></div>
+  </div>
+
+  <!-- ════ AFTER RETIREMENT ════ -->
+  <div class="card">
+    <div class="phase-header"><span class="phase-icon">🌳</span><span class="phase-title">After Retirement — Distribution Phase</span></div>
+    <div class="card-subtitle">The goal shifts to sequencing withdrawals across buckets so you control your bracket every year — instead of the IRS controlling it for you via RMDs.</div>
+    <div class="strategy-grid" id="afterStrategies"></div>
+  </div>
+
+  <!-- ════ Challenges / Advantages ════ -->
+  <div class="card">
+    <div class="card-title">Without a Bucket Strategy vs. With One</div>
+    <div class="compare-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;">
+      <div style="border-radius:4px;padding:20px;border:1.5px solid #EAC6C0;background:#FBF1ED;">
+        <div style="font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--rose);margin-bottom:12px;">⚠ Without a Plan</div>
+        <div style="display:flex;flex-direction:column;gap:9px;font-size:12px;color:var(--ink);line-height:1.5;">
+          <div>− Nearly all savings default into one bucket (usually tax-deferred or plain taxable), with no intentional mix</div>
+          <div>− Every withdrawal in retirement is taxed at ordinary rates, with no tax-free lever to pull</div>
+          <div>− RMDs force withdrawals on the IRS's schedule, often at a worse bracket than necessary</div>
+          <div>− A market downturn early in retirement forces selling taxable assets at the worst possible time</div>
+        </div>
+      </div>
+      <div style="border-radius:4px;padding:20px;border:1.5px solid #C5DECD;background:#F1F8F4;">
+        <div style="font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--teal);margin-bottom:12px;">✓ With a Bucket Plan</div>
+        <div style="display:flex;flex-direction:column;gap:9px;font-size:12px;color:var(--ink);line-height:1.5;">
+          <div>✓ Three buckets (zero-tax, tax-deferred, taxable) give you a withdrawal lever for any tax environment</div>
+          <div>✓ You choose your bracket each year by blending sources — instead of one income stream dictating it</div>
+          <div>✓ Tax-free bucket can be tapped in high-income or market-stress years without moving your bracket</div>
+          <div>✓ Heirs inherit tax-free or step-up basis assets instead of a fully taxable account</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ Other strategies ════ -->
+  <div class="card">
+    <div class="card-title">All Other Strategies Worth Knowing</div>
+    <div class="strategy-grid" id="otherStrategies"></div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-card">
+    <h3>Your Bucket Mix Is a Decision, Not a Default</h3>
+    <p>The right split between zero-tax, tax-deferred, and taxable accounts depends on your full picture. Let's map it together.</p>
+    <a class="cta-btn" href="https://princefinancialsolutions.com" target="_blank">Schedule a Tax Strategy Session</a>
+  </div>
+
+  <p class="disclaimer">
+    This tool provides educational estimates based on 2026 contribution limits and tax rules and is not legal, tax, or financial advice. Contribution limits, income phase-outs, and tax brackets are indexed annually and subject to legislative change — verify current figures with your CPA before acting.
+    Strategy availability (e.g., mega backdoor Roth, HSA eligibility) depends on your specific employer plan and health coverage. © Prince Financial Solutions.
+  </p>
+</div>
+
+<script>
+let profile = 'family';
+
+function fmt(n) {
+  if (Math.abs(n) >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+  return '$' + Math.round(n).toLocaleString();
+}
+function val(id) { return parseFloat(document.getElementById(id).value) || 0; }
+
+function setProfile(p) {
+  profile = p;
+  document.getElementById('btnFamily').classList.toggle('active', p === 'family');
+  document.getElementById('btnHnw').classList.toggle('active', p === 'hnw');
+  document.getElementById('hnwExtraInputs').style.display = p === 'hnw' ? 'grid' : 'none';
+
+  if (p === 'family') {
+    document.getElementById('incomeCardTitle').textContent = 'Household Income & Savings Capacity';
+    document.getElementById('incomeCardSubtitle').textContent = "Tell us what's available to save each year — we'll show you the optimal order to fill each bucket.";
+    document.getElementById('annualIncome').value = 200000;
+    document.getElementById('annualSavings').value = 30000;
+  } else {
+    document.getElementById('incomeCardTitle').textContent = 'Income, Savings Capacity & Liquid Net Worth';
+    document.getElementById('incomeCardSubtitle').textContent = 'High earners need a wider set of tools — most direct Roth and many deduction paths phase out at this income level.';
+    document.getElementById('annualIncome').value = 750000;
+    document.getElementById('annualSavings').value = 150000;
+  }
+  recalc();
+}
+
+function buildLadderFamily() {
+  return [
+    { rank: 1, type: 'zero', name: 'HSA (if enrolled in HDHP)', tag: 'Zero-Tax', desc: 'Triple tax advantage: deductible going in, tax-free growth, tax-free for qualified medical — including in retirement.', cap: 8750 },
+    { rank: 2, type: 'zero', name: '401(k) Match (employer free money)', tag: 'Zero-Tax Equivalent', desc: 'Not technically tax-free, but a guaranteed, immediate return no market can match — always capture the full match first.', cap: 6000 },
+    { rank: 3, type: 'zero', name: 'Roth IRA (direct, income permitting)', tag: 'Zero-Tax', desc: 'Full contribution allowed under $242,000 MAGI (joint) in 2026 — phases out by $252,000. Grows and withdraws completely tax-free.', cap: 7500 },
+    { rank: 4, type: 'zero', name: 'Indexed Universal Life (IUL)', tag: 'Zero-Tax (Structured)', desc: 'After-tax dollars in, tax-free growth linked to a market index with a 0% floor, and tax-free access via policy loans — with no IRS contribution cap once base accounts are full. Prioritized ahead of further 401(k) deferral.', cap: 0, featured: true },
+    { rank: 5, type: 'deferred', name: 'Remaining 401(k) Pre-Tax Contributions', tag: 'Tax-Deferred', desc: 'Reduces taxable income today at your marginal rate; taxed as ordinary income on withdrawal. Use this once HSA, match, Roth, and your target IUL funding are in place.', cap: 24500 },
+    { rank: 6, type: 'taxable', name: 'Taxable Brokerage Account', tag: 'Taxable', desc: 'No contribution limit and full liquidity, but dividends and realized gains are taxed annually. Use for goals before retirement age or once tax-advantaged room is full.', cap: 0 },
+  ];
+}
+
+function buildLadderHnw() {
+  return [
+    { rank: 1, type: 'zero', name: 'HSA (if eligible)', tag: 'Zero-Tax', desc: 'Same triple benefit regardless of income — often underused by high earners who skip it.', cap: 8750 },
+    { rank: 2, type: 'zero', name: '401(k) Match + Mega Backdoor Roth', tag: 'Zero-Tax', desc: 'If your plan allows after-tax contributions + in-plan conversion, you can move up to $72,000 total (2026) into Roth status, far beyond the standard $24,500 deferral.', cap: 72000 },
+    { rank: 3, type: 'zero', name: 'Backdoor Roth IRA', tag: 'Zero-Tax', desc: 'Direct Roth IRA is phased out above $252,000 MAGI (joint), but a non-deductible IRA contribution converted immediately to Roth sidesteps the income limit entirely.', cap: 7500 },
+    { rank: 4, type: 'zero', name: 'Indexed Universal Life (IUL)', tag: 'Zero-Tax (Structured)', desc: 'The primary lever once qualified plan room is exhausted. Large after-tax contributions grow tax-free with a 0% market floor, tax-free access via policy loans, and a death benefit that passes outside income tax — prioritized ahead of remaining 401(k) deferral once qualified room is full.', cap: 0, featured: true },
+    { rank: 5, type: 'deferred', name: 'Remaining 401(k) Pre-Tax Deferral', tag: 'Tax-Deferred', desc: 'Still useful for shifting income out of your peak earning bracket in a high-income year (bonus, sale event, vesting) — but funded after your IUL target once qualified room is maximized.', cap: 24500 },
+    { rank: 6, type: 'zero', name: 'Municipal Bonds / Muni Bond Funds', tag: 'Zero-Tax (Income)', desc: 'Interest is generally exempt from federal tax (and state tax if issued in your state) — a zero-tax income lever for the taxable bucket.', cap: 0 },
+    { rank: 7, type: 'taxable', name: 'Taxable Brokerage with Tax-Loss Harvesting', tag: 'Taxable (Optimized)', desc: 'Unlimited capacity. Use long-term holding periods, tax-loss harvesting, and qualified dividends to minimize — though not eliminate — the drag.', cap: 0 },
+  ];
+}
+
+function renderLadder() {
+  const items = profile === 'family' ? buildLadderFamily() : buildLadderHnw();
+  const html = items.map(it => `
+    <div class="ladder-row ${it.featured ? 'featured' : ''}">
+      <div class="ladder-rank ${it.type}">${it.rank}</div>
+      <div class="ladder-body">
+        <div class="ladder-name">${it.name}<span class="ladder-tag tag-${it.type}">${it.tag}</span>${it.featured ? '<span class="featured-star">★ Priority Focus</span>' : ''}</div>
+        <div class="ladder-desc">${it.desc}</div>
+      </div>
+      <div class="ladder-amt">${it.cap > 0 ? fmt(it.cap) + '/yr cap' : 'No cap'}</div>
+    </div>
+  `).join('');
+  document.getElementById('ladderContainer').innerHTML = html;
+  return items;
+}
+
+function allocateSavings(savings, items, income) {
+  // Fill capped buckets in rank order first (HSA, match, Roth/backdoor Roth)
+  let remaining = savings;
+  const results = items.map(it => ({ ...it, allocated: 0 }));
+
+  for (const r of results) {
+    if (remaining <= 0) break;
+    if (r.cap > 0 && r.rank < (results.find(x => x.featured)?.rank || 99)) {
+      const take = Math.min(r.cap, remaining);
+      r.allocated = take;
+      remaining -= take;
+    }
+  }
+
+  // IUL gets priority funding next: target is the larger of (40% of remaining savings) or
+  // whatever is left if remaining is modest — funded BEFORE remaining 401k deferral.
+  const iulBucket = results.find(r => r.featured);
+  if (iulBucket && remaining > 0) {
+    const iulTarget = remaining * 0.55; // weighted priority — majority of what's left after base accounts
+    iulBucket.allocated = iulTarget;
+    remaining -= iulTarget;
+  }
+
+  // Then fill remaining capped buckets after the featured one (e.g. remaining 401k pre-tax)
+  for (const r of results) {
+    if (remaining <= 0) break;
+    if (r.cap > 0 && !r.featured && r.allocated === 0) {
+      const take = Math.min(r.cap, remaining);
+      r.allocated = take;
+      remaining -= take;
+    }
+  }
+
+  // Any leftover flows to the next uncapped zero-tax bucket (e.g. munis), else taxable
+  if (remaining > 0) {
+    const uncappedZero = results.find(r => r.cap === 0 && r.type === 'zero' && !r.featured);
+    if (uncappedZero) {
+      uncappedZero.allocated += remaining;
+      remaining = 0;
+    } else {
+      const taxableBucket = results.find(r => r.type === 'taxable');
+      if (taxableBucket) taxableBucket.allocated += remaining;
+      remaining = 0;
+    }
+  }
+  return results;
+}
+
+function renderBucketBar(results) {
+  const totals = { zero: 0, deferred: 0, taxable: 0 };
+  results.forEach(r => totals[r.type] += r.allocated);
+  const grand = totals.zero + totals.deferred + totals.taxable || 1;
+  const pct = {
+    zero: (totals.zero/grand)*100,
+    deferred: (totals.deferred/grand)*100,
+    taxable: (totals.taxable/grand)*100,
+  };
+  const bar = `
+    <div class="bucket-seg zero" style="width:0%" data-w="${pct.zero.toFixed(1)}">${pct.zero>10?Math.round(pct.zero)+'%':''}</div>
+    <div class="bucket-seg deferred" style="width:0%" data-w="${pct.deferred.toFixed(1)}">${pct.deferred>10?Math.round(pct.deferred)+'%':''}</div>
+    <div class="bucket-seg taxable" style="width:0%" data-w="${pct.taxable.toFixed(1)}">${pct.taxable>10?Math.round(pct.taxable)+'%':''}</div>
+  `;
+  document.getElementById('bucketBar').innerHTML = bar;
+  setTimeout(() => {
+    document.querySelectorAll('.bucket-seg').forEach(el => { el.style.width = el.dataset.w + '%'; });
+  }, 150);
+  return totals;
+}
+
+function renderAllocTable(results, totals, savings) {
+  const rows = results.filter(r => r.allocated > 0).map(r => `
+    <div class="alloc-row">
+      <div class="alloc-label">${r.name}<span class="alloc-note">${r.tag}</span></div>
+      <div class="alloc-val">${fmt(r.allocated)}/yr</div>
+    </div>
+  `).join('');
+  const totalRow = `
+    <div class="alloc-row total">
+      <div class="alloc-label">Total Allocated</div>
+      <div class="alloc-val">${fmt(totals.zero + totals.deferred + totals.taxable)}/yr</div>
+    </div>
+  `;
+  document.getElementById('allocTable').innerHTML = rows + totalRow;
+}
+
+function renderExample() {
+  if (profile === 'family') {
+    document.getElementById('exampleBox').innerHTML = `
+      <div class="ex-label">Worked Example</div>
+      <p>A family earning <span class="ex-figure">$200,000</span> saving <span class="ex-figure">$30,000</span>/year fills their HSA ($8,750), captures their full 401(k) match, and maxes a Roth IRA ($7,500) — leaving roughly <span class="ex-figure">$13,750</span>. Rather than routing that into additional pre-tax 401(k), it's directed into a properly structured IUL first. Result: a clear majority of their savings lands in a <strong>zero-tax bucket with no IRS contribution ceiling</strong>, instead of deferring more tax to an unknown future bracket.</p>
+    `;
+  } else {
+    document.getElementById('exampleBox').innerHTML = `
+      <div class="ex-label">Worked Example</div>
+      <p>A high earner saving <span class="ex-figure">$150,000</span>/year fills the HSA, executes a <span class="ex-figure">$72,000</span> mega backdoor Roth (2026 total plan limit), and adds a <span class="ex-figure">$7,500</span> backdoor Roth IRA — leaving roughly <span class="ex-figure">$70,500</span>. That remainder is prioritized into a properly structured IUL <strong>before</strong> any additional 401(k) pre-tax deferral. Result: nearly the entire annual savings amount lands in a <strong>zero-tax, uncapped bucket</strong> — despite an income level that would otherwise lock them out of Roth IRAs entirely.</p>
+    `;
+  }
+}
+
+function renderBeforeStrategies() {
+  let items;
+  if (profile === 'family') {
+    items = [
+      { name: 'Max the HSA First', tag: 'Zero-Tax', cls: '', desc: 'Triple tax benefit beats every other account type — deductible, tax-free growth, tax-free for medical expenses (including many in retirement).', benefit: 'Best single dollar-for-dollar tax move available at this income level.' },
+      { name: 'Capture the Full 401(k) Match', tag: 'Zero-Tax Equivalent', cls: '', desc: 'If your employer matches 50% up to 6%, that\'s an instant 50% guaranteed return — nothing else compares.', benefit: 'Never leave employer match dollars unclaimed.' },
+      { name: 'Roth IRA Before Traditional, If Eligible', tag: 'Zero-Tax', cls: '', desc: 'At $200K joint income you\'re still under the 2026 phase-out ($242K–$252K), so a direct Roth IRA is fully available — prioritize it over additional pre-tax 401(k) once the match is captured.', benefit: 'Locks in tax-free growth for 20-30+ years before retirement.' },
+      { name: 'Fund an IUL Before Additional 401(k) Deferral', tag: 'Zero-Tax (Structured) · Priority', cls: '', desc: 'Once HSA, match, and Roth IRA are full, route the next dollar to a properly structured IUL rather than further pre-tax 401(k) — it has no IRS cap and adds living benefits (LTC riders) no retirement account offers.', benefit: 'Builds a larger zero-tax bucket than the 401(k) ceiling alone would ever allow.' },
+      { name: 'Use Remaining 401(k) for Bracket Management Only', tag: 'Tax-Deferred', cls: 'deferred-card', desc: 'Reserve additional pre-tax 401(k) deferral for years with unusually high income (bonus, etc.) where reducing the current bracket has clear, immediate value — not as the default next step.', benefit: 'Keeps tax-deferred space purposeful rather than just "what\'s left."' },
+    ];
+  } else {
+    items = [
+      { name: 'Mega Backdoor Roth (If Plan Allows)', tag: 'Zero-Tax', cls: '', desc: 'Move up to $72,000 total (2026 §415(c) limit) into Roth status through after-tax 401(k) contributions plus in-plan conversion — far beyond the $24,500 standard deferral.', benefit: 'The single largest legal zero-tax contribution vehicle available to a W-2 high earner.' },
+      { name: 'Backdoor Roth IRA', tag: 'Zero-Tax', cls: '', desc: 'Direct Roth IRA phases out at $252,000 MAGI (joint) in 2026 — a non-deductible IRA contribution converted immediately sidesteps this entirely. Watch the pro-rata rule if you hold other pre-tax IRA balances.', benefit: 'Adds another $7,500/year in permanent zero-tax space.' },
+      { name: 'Maximize HSA Even at High Income', tag: 'Zero-Tax', cls: '', desc: 'No income phase-out on HSA eligibility — high earners frequently skip this because the dollar amount feels small, but the triple tax benefit is identical at any income.', benefit: 'Often the most overlooked zero-tax bucket for HNW earners.' },
+      { name: 'Fund IUL Before Additional 401(k) Deferral', tag: 'Zero-Tax (Structured) · Priority', cls: '', desc: 'Once qualified plan room ($79,500 combined Mega Backdoor + Backdoor Roth) is exhausted, the next dollar goes to a properly structured, high-early-funded IUL — ahead of further pre-tax 401(k) — because it has no IRS contribution ceiling and scales with actual savings capacity.', benefit: 'Becomes the largest zero-tax bucket in the entire plan once fully funded over time.' },
+      { name: 'Use Remaining 401(k) for Targeted Bracket Management', tag: 'Tax-Deferred', cls: 'deferred-card', desc: 'Reserve additional pre-tax 401(k) deferral for years where reducing current taxable income has clear strategic value (e.g., a liquidity event year) rather than defaulting to it.', benefit: 'Keeps tax-deferred space purposeful, used by design rather than default.' },
+      { name: 'Direct Indexing + Tax-Loss Harvesting in the Taxable Bucket', tag: 'Taxable (Optimized)', cls: 'taxable-card', desc: 'For dollars that must sit in a taxable brokerage account, direct indexing with systematic loss harvesting can offset gains elsewhere in your portfolio.', benefit: 'Reduces the drag on the bucket that can\'t be made tax-free.' },
+    ];
+  }
+  document.getElementById('beforeStrategies').innerHTML = items.map(s => `
+    <div class="strategy-card ${s.cls}">
+      <div class="strategy-head"><span class="strategy-name">${s.name}</span><span class="strategy-tag">${s.tag}</span></div>
+      <div class="strategy-desc">${s.desc}</div>
+      <div class="strategy-benefit">→ ${s.benefit}</div>
+    </div>
+  `).join('');
+}
+
+function renderAfterStrategies() {
+  let items;
+  if (profile === 'family') {
+    items = [
+      { name: 'Roth Conversion in Low-Income Gap Years', tag: 'Zero-Tax Conversion', cls: '', desc: 'Between retirement and Social Security/RMD age, income is often unusually low — an ideal window to convert Traditional 401(k)/IRA dollars to Roth at a low marginal rate.', benefit: 'Shrinks future RMDs while paying tax at the lowest rate you\'ll ever see again.' },
+      { name: 'Withdraw From Taxable Bucket First', tag: 'Sequencing', cls: 'taxable-card', desc: 'Spend down the taxable brokerage account early in retirement (often at favorable long-term capital gains rates) while letting Roth and tax-deferred accounts keep growing.', benefit: 'Preserves tax-advantaged growth the longest.' },
+      { name: 'Use HSA Funds for Medical Costs Tax-Free', tag: 'Zero-Tax', cls: '', desc: 'Withdrawals for qualified medical expenses remain tax-free at any age — a meaningful, often-overlooked income source in retirement.', benefit: 'Covers a major retirement expense category with zero tax drag.' },
+      { name: 'Tap the Roth Bucket for Big, Unplanned Expenses', tag: 'Zero-Tax', cls: '', desc: 'A new roof, a wedding gift, a car — pulling from Roth instead of the Traditional 401(k) avoids spiking your taxable income (and possibly Medicare IRMAA) in that year.', benefit: 'Keeps one-time expenses from bumping your bracket.' },
+    ];
+  } else {
+    items = [
+      { name: 'Bracket-Filling Roth Conversions', tag: 'Zero-Tax Conversion', cls: '', desc: 'Convert just enough Traditional IRA/401(k) balance each year to fill your current bracket without spilling into the next one — done consistently in the years before RMDs begin.', benefit: 'Permanently shrinks the balance subject to future RMDs.' },
+      { name: 'Qualified Charitable Distributions (QCD)', tag: 'Zero-Tax', cls: '', desc: 'Once RMD-eligible, direct up to $111,000/year (2026, inflation-indexed) from an IRA straight to charity — it counts toward your RMD but is never added to taxable income.', benefit: 'Fully satisfies RMDs on the donated amount at zero tax.' },
+      { name: 'Tax-Free Policy Loans From IUL', tag: 'Zero-Tax', cls: '', desc: 'Income drawn via policy loans from a properly structured cash-value policy does not count as taxable income and does not affect Social Security taxation or IRMAA thresholds.', benefit: 'A withdrawal lever that doesn\'t move your tax bracket at all.' },
+      { name: 'Sequence Withdrawals Across All Three Buckets', tag: 'Sequencing', cls: '', desc: 'In any given year, blend taxable, tax-deferred, and zero-tax withdrawals to land at a precise target taxable income — rather than letting one source dictate your bracket.', benefit: 'Maximum control over your effective tax rate, year by year.' },
+      { name: 'Donor-Advised Fund / Appreciated Stock Gifting', tag: 'Zero-Tax (Charitable)', cls: '', desc: 'Gifting appreciated securities (instead of cash) to a donor-advised fund avoids capital gains tax entirely while still generating a charitable deduction.', benefit: 'Eliminates capital gains tax on the gifted shares completely.' },
+    ];
+  }
+  document.getElementById('afterStrategies').innerHTML = items.map(s => `
+    <div class="strategy-card ${s.cls}">
+      <div class="strategy-head"><span class="strategy-name">${s.name}</span><span class="strategy-tag">${s.tag}</span></div>
+      <div class="strategy-desc">${s.desc}</div>
+      <div class="strategy-benefit">→ ${s.benefit}</div>
+    </div>
+  `).join('');
+}
+
+function renderOtherStrategies() {
+  let items;
+  if (profile === 'family') {
+    items = [
+      { name: '529 Plan for Kids\' Education', tag: 'Zero-Tax (Goal-Based)', desc: 'Tax-free growth and withdrawal for qualified education expenses; unused funds can now roll into a Roth IRA for the beneficiary under SECURE 2.0 rules (limits apply).' },
+      { name: 'Dependent Care FSA', tag: 'Pre-Tax', desc: 'Pre-tax dollars for childcare expenses reduce taxable income dollar-for-dollar up to the annual limit.' },
+      { name: 'Tax-Loss Harvesting in Taxable Accounts', tag: 'Taxable (Optimized)', desc: 'Offsetting realized gains with realized losses reduces the annual tax drag on the one bucket that can\'t be made fully tax-free.' },
+      { name: 'Term Life Insurance for Income Replacement', tag: 'Protection', desc: 'Not a tax strategy itself, but protects the entire bucket plan from being derailed if the primary earner is lost mid-accumulation.' },
+    ];
+  } else {
+    items = [
+      { name: 'Family Limited Partnership / Valuation Discounting', tag: 'Estate + Income', desc: 'For business owners, gifting discounted LP/LLC interests reduces both income tax exposure (income-shifting to lower-bracket family members) and future estate tax.' },
+      { name: 'Opportunity Zone Investing', tag: 'Capital Gains Deferral', desc: 'Reinvesting realized capital gains into a Qualified Opportunity Fund can defer and potentially reduce capital gains tax, with basis step-up benefits for long-term holds.' },
+      { name: 'Charitable Remainder Trust (CRT)', tag: 'Zero-Tax (Charitable)', desc: 'Donate appreciated assets, receive an income stream, defer/avoid capital gains tax on the contributed assets, and get a current charitable deduction.' },
+      { name: 'Installment Sale / Self-Directed Note', tag: 'Capital Gains Deferral', desc: 'Spreading a large capital gain (e.g., business or real estate sale) over multiple years can keep you out of the top bracket in any single year.' },
+      { name: 'Captive Insurance / 831(b) (If Business Owner)', tag: 'Tax-Deferred', desc: 'For business owners with genuine risk-management needs, a properly structured captive can shift underwriting profit into a tax-advantaged structure — requires careful compliance.' },
+    ];
+  }
+  document.getElementById('otherStrategies').innerHTML = items.map(s => `
+    <div class="strategy-card">
+      <div class="strategy-head"><span class="strategy-name">${s.name}</span><span class="strategy-tag">${s.tag}</span></div>
+      <div class="strategy-desc">${s.desc}</div>
+    </div>
+  `).join('');
+}
+
+function renderIulSpotlight(results) {
+  const iul = results.find(r => r.featured);
+  const iulAmount = iul ? iul.allocated : 0;
+
+  const benefitsFamily = [
+    { t: 'Uncapped Contributions', d: 'No IRS dollar limit, unlike a 401(k) or IRA — funding level is set by the policy design and your savings capacity, not a statute.' },
+    { t: 'Tax-Free Policy Loans', d: 'Income accessed via policy loans is not reported as taxable income, and doesn\'t count toward provisional income for Social Security taxation.' },
+    { t: '0% Floor on Market-Linked Growth', d: 'Cash value is credited based on an index\'s performance up to a cap, but never loses value to a market downturn — growth resets each cycle.' },
+    { t: 'Living Benefits (LTC/Chronic Illness Riders)', d: 'Many policies allow accelerated access to the death benefit while living, for long-term care or chronic illness — a benefit no retirement account offers.' },
+    { t: 'Death Benefit Passes Income-Tax-Free', d: 'Beneficiaries receive the policy\'s death benefit free of federal income tax, and outside probate if properly designated.' },
+    { t: 'No RMDs, Ever', d: 'Unlike a Traditional 401(k) or IRA, there is no forced withdrawal schedule — you control timing and amount entirely.' },
+  ];
+  const benefitsHnw = [
+    { t: 'Uncapped, Scalable Funding', d: 'Once Mega Backdoor Roth and Backdoor Roth room ($79,500/yr combined in 2026) is exhausted, IUL is the primary vehicle with no IRS ceiling — it scales with actual savings capacity.' },
+    { t: 'Tax-Free Access Without Bracket Impact', d: 'Policy loans don\'t appear on a tax return, don\'t affect AGI-based phaseouts, and don\'t trigger IRMAA Medicare surcharges or Social Security taxation.' },
+    { t: '0% Floor With Market-Linked Upside', d: 'Cash value participates in index gains up to a cap, with full downside protection — a smoother ride than direct market exposure for this bucket.' },
+    { t: 'Estate-Tax-Efficient When ILIT-Owned', d: 'Held inside an Irrevocable Life Insurance Trust, the death benefit can pass outside both income tax and the taxable estate entirely.' },
+    { t: 'Living Benefits at Scale', d: 'Chronic illness and LTC riders can fund a meaningful self-insurance strategy without separately underwriting a standalone LTC policy.' },
+    { t: 'No RMDs, No Forced Liquidation', d: 'Complements a Traditional 401(k)/IRA stack by giving you a large, lifetime-flexible bucket the IRS can never force you to draw from.' },
+  ];
+  const benefits = profile === 'family' ? benefitsFamily : benefitsHnw;
+
+  const html = `
+    <div class="iul-spotlight-eyebrow">Priority Strategy</div>
+    <h3>Why IUL Is Funded Before Additional 401(k) Deferral</h3>
+    <p class="lead">Once HSA, employer match, and Roth/Backdoor Roth room are filled, the next dollar is directed to a properly structured Indexed Universal Life policy — ahead of further pre-tax 401(k) contributions — because it combines tax-free access with no contribution ceiling.</p>
+    <div class="iul-benefit-grid">
+      ${benefits.map(b => `<div class="iul-benefit"><div class="ib-title">${b.t}</div><div class="ib-desc">${b.d}</div></div>`).join('')}
+    </div>
+    <div class="iul-allocation-note">Based on your inputs, this allocates roughly <strong>${fmt(iulAmount)}/year</strong> toward IUL funding — prioritized ahead of remaining 401(k) pre-tax contributions in the table below. Actual policy design (death benefit, funding corridor, MEC testing) should be structured with an underwriting illustration, not just this estimate.</div>
+  `;
+  document.getElementById('iulSpotlight').innerHTML = html;
+}
+
+function recalc() {
+  const savings = val('annualSavings');
+  const income = val('annualIncome');
+  const items = renderLadder();
+  const results = allocateSavings(savings, items, income);
+  const totals = renderBucketBar(results);
+  renderIulSpotlight(results);
+  renderAllocTable(results, totals, savings);
+  renderExample();
+  renderBeforeStrategies();
+  renderAfterStrategies();
+  renderOtherStrategies();
+}
+
+recalc();
+</script>
+</body>
+</html>

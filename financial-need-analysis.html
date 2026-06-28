@@ -141,13 +141,15 @@
 
   /* ===== Lead Capture Modal ===== */
   .modal-overlay {
-    display:none; position:fixed; inset:0; background:rgba(10,27,51,0.55);
-    z-index:1000; align-items:center; justify-content:center; padding:20px;
+    display:none; position:absolute; top:0; left:0; right:0; min-height:100%;
+    background:rgba(10,27,51,0.55);
+    z-index:1000; align-items:flex-start; justify-content:center; padding:20px;
   }
   .modal-overlay.active { display:flex; }
   .modal-box {
     background:var(--white); border-radius:10px; max-width:440px; width:100%;
     padding:32px 30px 28px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,.3);
+    margin-top:80px;
   }
   .modal-close {
     position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px;
@@ -508,16 +510,56 @@ function openCalendlyPopup(){
    ════════════════════════════════════════════════════════════ */
 const LEAD_SUBMIT_URL = 'https://www.princefinancialsolutions.com/_functions/submitFNALead';
 
+/* ════════════════════════════════════════════════════════════
+   AUTO-HEIGHT: tells the parent Wix page how tall this content
+   actually is, so the iframe can resize itself automatically
+   instead of using a fixed, manually-guessed height.
+   ════════════════════════════════════════════════════════════ */
+function reportHeightToParent(){
+  // Use the tallest of a few measurements for reliability across browsers
+  const height = Math.max(
+    document.body.scrollHeight,
+    document.documentElement.scrollHeight,
+    document.body.offsetHeight
+  );
+  // postMessage works across the iframe boundary even though Wix (parent)
+  // and GitHub Pages (this page) are different domains.
+  window.parent.postMessage({ type: 'fna-resize', height: height }, '*');
+}
+
+// Report height on load, and again shortly after (fonts/images can shift layout)
+window.addEventListener('load', () => {
+  reportHeightToParent();
+  setTimeout(reportHeightToParent, 400);
+  setTimeout(reportHeightToParent, 1200);
+});
+
+// Report height whenever the visible content is likely to have changed size
+function scheduleHeightReport(){
+  setTimeout(reportHeightToParent, 50);
+  setTimeout(reportHeightToParent, 350);
+}
+
 let lastReportSnapshot = null; // populated by generateReport()
 
 function openLeadModal(){
   document.getElementById('leadFormView').style.display = 'block';
   document.getElementById('leadSuccessView').style.display = 'none';
   document.getElementById('leadModalError').textContent = '';
-  document.getElementById('leadModalOverlay').classList.add('active');
+  const overlay = document.getElementById('leadModalOverlay');
+  overlay.classList.add('active');
+  // Safety fallback: even if the parent page hasn't resized the iframe yet,
+  // make sure the overlay covers all existing content so clicks land correctly.
+  overlay.style.height = Math.max(document.body.scrollHeight, window.innerHeight) + 'px';
+  overlay.scrollIntoView({ behavior: 'instant', block: 'start' });
+  window.scrollTo(0, overlay.offsetTop);
+  document.body.style.overflow = 'hidden';
+  scheduleHeightReport();
 }
 function closeLeadModal(){
   document.getElementById('leadModalOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+  scheduleHeightReport();
 }
 function proceedToPrint(){
   closeLeadModal();
@@ -605,8 +647,9 @@ function addKid(){
     '<div class="field"><label>Child ' + id + ' Age</label><input type="number" class="no-prefix kid-age" min="0" max="30" value="8"></div>' +
     '<div class="field"><label>Plan for College?</label>' +
     '<select class="kid-college"><option value="yes" selected>Yes</option><option value="no">No</option></select></div>' +
-    '<button class="remove-kid" onclick="document.getElementById(\'kidRow' + id + '\').remove()">Remove</button>';
+    '<button class="remove-kid" onclick="document.getElementById(\'kidRow' + id + '\').remove(); scheduleHeightReport();">Remove</button>';
   document.getElementById('kidsContainer').appendChild(div);
+  scheduleHeightReport();
 }
 addKid();
 
@@ -629,6 +672,7 @@ function goTo(step){
   document.getElementById('progressText').textContent = 'Step ' + step + ' of 8' + (step<=7 ? ' \u2014 ' + stepLabels[step-1] : ' \u2014 Your Report');
   document.getElementById('progressPct').textContent = pct + '%';
   window.scrollTo({top:0, behavior:'smooth'});
+  scheduleHeightReport();
 }
 function restart(){ goTo(1); document.getElementById('progressWrap').style.display='block'; }
 
@@ -908,6 +952,7 @@ function generateReport(){
 
   document.getElementById('progressWrap').style.display = 'none';
   goTo(8);
+  scheduleHeightReport();
 }
 </script>
 </body>

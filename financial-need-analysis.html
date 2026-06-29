@@ -34,6 +34,8 @@
   @media (max-width:540px){ .field-grid{ grid-template-columns:1fr; } }
   .field { display:flex; flex-direction:column; gap:6px; }
   .field.full { grid-column:1/-1; }
+
+
   label { font-size:11px; font-weight:600; color:var(--slate); text-transform:uppercase; letter-spacing:.5px; }
   .input-wrap { position:relative; }
   .input-prefix { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:13px; color:var(--slate); font-weight:500; pointer-events:none; }
@@ -236,6 +238,20 @@
       </div>
 
       <div class="btn-row"><button class="btn btn-primary" onclick="goTo(2)">Next →</button></div>
+
+      <button onclick="testWixMessage()">Test Wix Message</button>
+
+      <script>
+        function testWixMessage() {
+          window.parent.postMessage({
+              type: "DOWNLOAD_REPORT",
+              reportType: "test",
+              reportName: "Test Report"
+          }, "*");
+        }
+      </script>
+
+
     </div>
   </div>
 

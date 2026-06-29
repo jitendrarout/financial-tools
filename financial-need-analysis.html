@@ -504,66 +504,102 @@ function openCalendlyPopup(){
 }
 
 /* ════════════════════════════════════════════════════════════
-   ACTION REQUIRED: This must point to your working Velo HTTP function.
-   As of now, this endpoint returns 404 — confirm with Wix Support or
-   switch to a Zapier webhook URL once that path is set up.
-   ════════════════════════════════════════════════════════════ */
-const LEAD_SUBMIT_URL = 'https://www.princefinancialsolutions.com/_functions/submitFNALead';
+   GENERIC WIX REPORT GATEWAY
+   Reusable for any embedded calculator/report.
 
-/* ════════════════════════════════════════════════════════════
-   AUTO-HEIGHT: tells the parent Wix page how tall this content
-   actually is, so the iframe can resize itself automatically
-   instead of using a fixed, manually-guessed height.
+   HTML → Wix parent message:
+     type: DOWNLOAD_REPORT
+
+   Wix parent → HTML unlock message:
+     type: REPORT_DOWNLOAD_APPROVED
+
+   This file is the Financial Need Analysis implementation, but the
+   same gateway can be reused for retirement reports, insurance reports,
+   Social Security reports, etc. by changing reportType/reportName only.
    ════════════════════════════════════════════════════════════ */
-function reportHeightToParent(){
-  // Use the tallest of a few measurements for reliability across browsers
-  const height = Math.max(
-    document.body.scrollHeight,
-    document.documentElement.scrollHeight,
-    document.body.offsetHeight
-  );
-  // postMessage works across the iframe boundary even though Wix (parent)
-  // and GitHub Pages (this page) are different domains.
-  window.parent.postMessage({ type: 'fna-resize', height: height }, '*');
+const REPORT_GATEWAY_CONFIG = {
+  reportType: 'financial-need-analysis',
+  reportName: 'Financial Need Analysis',
+  reportVersion: '1.0',
+  source: 'Financial Need Analysis Calculator'
+};
+
+let pendingDownloadAfterLeadCapture = false;
+
+function buildReportPayload(){
+  const isMarried = document.getElementById('maritalStatus')?.value === 'married';
+
+  return {
+    reportType: REPORT_GATEWAY_CONFIG.reportType,
+    reportName: REPORT_GATEWAY_CONFIG.reportName,
+    reportVersion: REPORT_GATEWAY_CONFIG.reportVersion,
+    source: REPORT_GATEWAY_CONFIG.source,
+    generatedAt: new Date().toISOString(),
+    reportSummary: lastReportSnapshot || {},
+    inputs: {
+      userName: document.getElementById('userName')?.value || '',
+      userAge: val('userAge'),
+      maritalStatus: document.getElementById('maritalStatus')?.value || '',
+      spouseAge: isMarried ? val('spouseAge') : 0,
+      state: document.getElementById('userState')?.value || '',
+      totalAnnualIncome: val('incomeSelf') + (isMarried ? val('incomeSpouse') : 0) + val('incomeOther'),
+      monthlyExpenses: ['expHousing','expTransport','expFood','expInsurance','expDebt','expChildcare','expDiscretionary','expOther'].reduce((s, id) => s + val(id), 0),
+      targetRetirementAge: val('retireAge'),
+      desiredAnnualRetirementIncome: val('retireIncomeGoal')
+    }
+  };
 }
 
-// Report height on load, and again shortly after (fonts/images can shift layout)
-window.addEventListener('load', () => {
-  reportHeightToParent();
-  setTimeout(reportHeightToParent, 400);
-  setTimeout(reportHeightToParent, 1200);
+function requestWixLeadCapture(){
+  pendingDownloadAfterLeadCapture = true;
+
+  const payload = buildReportPayload();
+
+  window.parent.postMessage({
+    type: 'DOWNLOAD_REPORT',
+    reportType: payload.reportType,
+    reportName: payload.reportName,
+    reportVersion: payload.reportVersion,
+    reportData: payload,
+    metadata: {
+      source: payload.source,
+      generatedAt: payload.generatedAt,
+      userName: payload.inputs.userName,
+      score: payload.reportSummary?.score || payload.reportSummary?.wellnessScore || null
+    }
+  }, '*');
+}
+
+// Existing HTML buttons already call openLeadModal().
+// In Wix mode, this opens the generic Wix Lead Capture lightbox through parent-page messaging.
+function openLeadModal(){
+  requestWixLeadCapture();
+}
+
+function proceedToPrint(){
+  pendingDownloadAfterLeadCapture = false;
+  window.print();
+}
+
+// Called by the Wix parent page after the reusable Wix Lightbox saves the lead into Wix CRM.
+window.addEventListener('message', function(event) {
+  const data = event.data || {};
+
+  if (data.type === 'REPORT_DOWNLOAD_APPROVED') {
+    // Optional safety check: only unlock if Wix approved this report type.
+    if (!data.reportType || data.reportType === REPORT_GATEWAY_CONFIG.reportType) {
+      proceedToPrint();
+    }
+  }
+
+  if (data.type === 'REPORT_DOWNLOAD_CANCELLED' || data.type === 'CONTACT_CAPTURE_CANCELLED') {
+    pendingDownloadAfterLeadCapture = false;
+  }
 });
 
-// Report height whenever the visible content is likely to have changed size
-function scheduleHeightReport(){
-  setTimeout(reportHeightToParent, 50);
-  setTimeout(reportHeightToParent, 350);
-}
-
-let lastReportSnapshot = null; // populated by generateReport()
-
-function openLeadModal(){
-  document.getElementById('leadFormView').style.display = 'block';
-  document.getElementById('leadSuccessView').style.display = 'none';
-  document.getElementById('leadModalError').textContent = '';
-  const overlay = document.getElementById('leadModalOverlay');
-  overlay.classList.add('active');
-  // Safety fallback: even if the parent page hasn't resized the iframe yet,
-  // make sure the overlay covers all existing content so clicks land correctly.
-  overlay.style.height = Math.max(document.body.scrollHeight, window.innerHeight) + 'px';
-  overlay.scrollIntoView({ behavior: 'instant', block: 'start' });
-  window.scrollTo(0, overlay.offsetTop);
-  document.body.style.overflow = 'hidden';
-  scheduleHeightReport();
-}
+// Legacy modal function is intentionally disabled in Wix mode.
 function closeLeadModal(){
-  document.getElementById('leadModalOverlay').classList.remove('active');
-  document.body.style.overflow = '';
-  scheduleHeightReport();
-}
-function proceedToPrint(){
-  closeLeadModal();
-  window.print();
+  pendingDownloadAfterLeadCapture = false;
 }
 
 function isValidEmail(email){
@@ -571,56 +607,7 @@ function isValidEmail(email){
 }
 
 async function submitLeadForm(){
-  const firstName = document.getElementById('leadFirstName').value.trim();
-  const lastName = document.getElementById('leadLastName').value.trim();
-  const email = document.getElementById('leadEmail').value.trim();
-  const phone = document.getElementById('leadPhone').value.trim();
-  const errEl = document.getElementById('leadModalError');
-  const btn = document.getElementById('leadSubmitBtn');
-
-  if (!firstName || !lastName) { errEl.textContent = 'Please enter your first and last name.'; return; }
-  if (!email || !isValidEmail(email)) { errEl.textContent = 'Please enter a valid email address.'; return; }
-  if (!phone) { errEl.textContent = 'Please enter your phone number.'; return; }
-  errEl.textContent = '';
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="modal-spinner"></span>Sending...';
-
-  const payload = {
-    firstName, lastName, email, phone,
-    reportSummary: lastReportSnapshot || {},
-    source: 'Financial Need Analysis Calculator',
-    submittedAt: new Date().toISOString()
-  };
-
-  try {
-    const res = await fetch(LEAD_SUBMIT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) throw new Error('Server responded with ' + res.status);
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || 'Unknown error');
-
-    document.getElementById('leadSuccessMessage').textContent =
-      'Your report is on its way to ' + email + '. You can also print or save it now using the button below.';
-    document.getElementById('leadFormView').style.display = 'none';
-    document.getElementById('leadSuccessView').style.display = 'block';
-
-  } catch (err) {
-    console.error('Lead submission failed:', err);
-    // Graceful fallback: don't block the visitor from getting their report
-    // just because the backend integration isn't reachable yet.
-    document.getElementById('leadSuccessMessage').textContent =
-      "We've saved your information. You can print or save your report now below.";
-    document.getElementById('leadFormView').style.display = 'none';
-    document.getElementById('leadSuccessView').style.display = 'block';
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = 'Get My Report';
-  }
+  requestWixLeadCapture();
 }
 
 let kidCount = 0;

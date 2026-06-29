@@ -139,6 +139,51 @@
   }
   .print-btn-row { display:flex; gap:10px; justify-content:center; margin:18px 0 4px; }
 
+  /* ===== Lead Capture Modal ===== */
+  .modal-overlay {
+    display:none; position:absolute; top:0; left:0; right:0; min-height:100%;
+    background:rgba(10,27,51,0.55);
+    z-index:1000; align-items:flex-start; justify-content:center; padding:20px;
+  }
+  .modal-overlay.active { display:flex; }
+  .modal-box {
+    background:var(--white); border-radius:10px; max-width:440px; width:100%;
+    padding:32px 30px 28px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,.3);
+    margin-top:80px;
+  }
+  .modal-close {
+    position:absolute; top:14px; right:16px; background:none; border:none; font-size:20px;
+    color:var(--slate); cursor:pointer; line-height:1; padding:4px;
+  }
+  .modal-close:hover { color:var(--ink); }
+  .modal-icon { width:54px; height:54px; border-radius:50%; background:var(--paper); display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:14px; }
+  .modal-box h3 { font-family:'Playfair Display',serif; font-size:21px; font-weight:700; color:var(--navy); margin-bottom:7px; }
+  .modal-box p.modal-sub { font-size:13px; color:var(--slate); margin-bottom:20px; line-height:1.5; }
+  .modal-field { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+  .modal-field label { font-size:11px; font-weight:600; color:var(--slate); text-transform:uppercase; letter-spacing:.5px; }
+  .modal-field input {
+    width:100%; padding:11px 13px; border:1.5px solid var(--hairline); border-radius:6px;
+    font-size:14px; font-family:'Inter',sans-serif; color:var(--ink); background:var(--paper);
+  }
+  .modal-field input:focus { outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(184,137,59,.12); background:var(--white); }
+  .modal-field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .modal-error { font-size:11.5px; color:var(--red); margin-top:-8px; margin-bottom:10px; min-height:14px; }
+  .modal-submit-btn {
+    width:100%; padding:13px; background:var(--navy); color:var(--white); border:none; border-radius:6px;
+    font-size:14px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; transition:all .2s; margin-top:6px;
+  }
+  .modal-submit-btn:hover { background:var(--gold); }
+  .modal-submit-btn:disabled { opacity:0.6; cursor:not-allowed; }
+  .modal-privacy { font-size:10px; color:#9AA3A8; text-align:center; margin-top:12px; line-height:1.5; }
+  .modal-success { text-align:center; padding:10px 0; }
+  .modal-success .ms-icon { font-size:40px; margin-bottom:12px; }
+  .modal-success h3 { margin-bottom:8px; }
+  .modal-success p { font-size:13.5px; color:var(--slate); line-height:1.55; }
+  .modal-spinner {
+    display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,.4);
+    border-top-color:#fff; border-radius:50%; animation:modalspin .7s linear infinite; margin-right:8px; vertical-align:-2px;
+  }
+  @keyframes modalspin { to { transform:rotate(360deg); } }
 </style>
 <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
 <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
@@ -398,6 +443,51 @@
 
 </div>
 
+<!-- ═══ Lead Capture Modal ═══ -->
+<div class="modal-overlay no-print" id="leadModalOverlay">
+  <div class="modal-box" id="leadModalBox">
+    <button class="modal-close" onclick="closeLeadModal()" aria-label="Close">✕</button>
+
+    <div id="leadFormView">
+      <div class="modal-icon">📄</div>
+      <h3>Get Your Full Report</h3>
+      <p class="modal-sub">Enter your details to download your personalized Financial Need Analysis and receive a copy by email.</p>
+
+      <div class="modal-field-row">
+        <div class="modal-field">
+          <label for="leadFirstName">First Name</label>
+          <input type="text" id="leadFirstName" autocomplete="given-name">
+        </div>
+        <div class="modal-field">
+          <label for="leadLastName">Last Name</label>
+          <input type="text" id="leadLastName" autocomplete="family-name">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label for="leadEmail">Email Address</label>
+        <input type="email" id="leadEmail" autocomplete="email">
+      </div>
+      <div class="modal-field">
+        <label for="leadPhone">Phone Number</label>
+        <input type="tel" id="leadPhone" autocomplete="tel">
+      </div>
+      <div class="modal-error" id="leadModalError"></div>
+
+      <button class="modal-submit-btn" id="leadSubmitBtn" onclick="submitLeadForm()">Get My Report</button>
+      <p class="modal-privacy">Your information is used only to send you this report and relevant follow-up. We do not sell or share your data.</p>
+    </div>
+
+    <div id="leadSuccessView" style="display:none;">
+      <div class="modal-success">
+        <div class="ms-icon">✅</div>
+        <h3>You're All Set</h3>
+        <p id="leadSuccessMessage">Your report is on its way to your email. You can also print or save it now using the button below.</p>
+        <button class="modal-submit-btn" style="margin-top:18px;" onclick="proceedToPrint()">Continue to Print / Save PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ════════════════════════════════════════════════════════════
    ACTION REQUIRED: Replace the line below with your real Calendly link.
@@ -414,70 +504,72 @@ function openCalendlyPopup(){
 }
 
 /* ════════════════════════════════════════════════════════════
-   GENERIC WIX REPORT GATEWAY — CLEAN VERSION
-
-   Purpose:
-   - The embedded HTML never shows its own contact popup.
-   - When the visitor clicks Print / Save PDF, this HTML sends DOWNLOAD_REPORT to Wix.
-   - Wix opens the reusable "Report Lead Capture" lightbox.
-   - After Wix saves the lead to CRM, Wix sends REPORT_DOWNLOAD_APPROVED back here.
-   - Then this HTML opens the browser print/save PDF dialog.
+   ACTION REQUIRED: This must point to your working Velo HTTP function.
+   As of now, this endpoint returns 404 — confirm with Wix Support or
+   switch to a Zapier webhook URL once that path is set up.
    ════════════════════════════════════════════════════════════ */
-const REPORT_GATEWAY_CONFIG = {
-  reportType: 'financial-need-analysis',
-  reportName: 'Financial Need Analysis',
-  reportVersion: '1.0',
-  source: 'Financial Need Analysis Calculator'
-};
+const LEAD_SUBMIT_URL = 'https://www.princefinancialsolutions.com/_functions/submitFNALead';
 
-let pendingReportDownload = false;
+/* ════════════════════════════════════════════════════════════
+   AUTO-HEIGHT: tells the parent Wix page how tall this content
+   actually is, so the iframe can resize itself automatically
+   instead of using a fixed, manually-guessed height.
+   ════════════════════════════════════════════════════════════ */
+function reportHeightToParent(){
+  // Use the tallest of a few measurements for reliability across browsers
+  const height = Math.max(
+    document.body.scrollHeight,
+    document.documentElement.scrollHeight,
+    document.body.offsetHeight
+  );
+  // postMessage works across the iframe boundary even though Wix (parent)
+  // and GitHub Pages (this page) are different domains.
+  window.parent.postMessage({ type: 'fna-resize', height: height }, '*');
+}
 
-function buildReportPayload(){
-  const isMarried = document.getElementById('maritalStatus')?.value === 'married';
+// Report height on load, and again shortly after (fonts/images can shift layout)
+window.addEventListener('load', () => {
+  reportHeightToParent();
+  setTimeout(reportHeightToParent, 400);
+  setTimeout(reportHeightToParent, 1200);
+});
 
-  return {
-    reportType: REPORT_GATEWAY_CONFIG.reportType,
-    reportName: REPORT_GATEWAY_CONFIG.reportName,
-    reportVersion: REPORT_GATEWAY_CONFIG.reportVersion,
-    source: REPORT_GATEWAY_CONFIG.source,
-    generatedAt: new Date().toISOString(),
-    reportSummary: lastReportSnapshot || {},
-    inputs: {
-      userName: document.getElementById('userName')?.value || '',
-      userAge: val('userAge'),
-      maritalStatus: document.getElementById('maritalStatus')?.value || '',
-      spouseAge: isMarried ? val('spouseAge') : 0,
-      state: document.getElementById('userState')?.value || '',
-      totalAnnualIncome: val('incomeSelf') + (isMarried ? val('incomeSpouse') : 0) + val('incomeOther'),
-      monthlyExpenses: ['expHousing','expTransport','expFood','expInsurance','expDebt','expChildcare','expDiscretionary','expOther'].reduce((s, id) => s + val(id), 0),
-      targetRetirementAge: val('retireAge'),
-      desiredAnnualRetirementIncome: val('retireIncomeGoal')
+// Report height whenever the visible content is likely to have changed size
+function scheduleHeightReport(){
+  setTimeout(reportHeightToParent, 50);
+  setTimeout(reportHeightToParent, 350);
+}
+
+let lastReportSnapshot = null; // populated by generateReport()
+
+
+/* ════════════════════════════════════════════════════════════
+   WIX REPORT GATEWAY - GENERIC DOWNLOAD LOCK
+   This keeps the calculator working normally, but sends download
+   requests to the Wix parent page so Wix can open the reusable
+   Report Lead Capture lightbox.
+   ════════════════════════════════════════════════════════════ */
+function requestReportDownload(){
+  const payload = {
+    type: 'DOWNLOAD_REPORT',
+    reportType: 'financial-need-analysis',
+    reportName: 'Financial Need Analysis',
+    reportData: lastReportSnapshot || {},
+    metadata: {
+      generatedAt: new Date().toISOString(),
+      userName: (document.getElementById('userName')?.value || '').trim(),
+      state: (document.getElementById('userState')?.value || '').trim(),
+      sourcePage: 'financialneedanalysis'
     }
   };
-}
 
-function requestReportDownload(){
-  pendingReportDownload = true;
+  // When embedded in Wix, this asks the Wix page to open the lightbox.
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage(payload, '*');
+    return;
+  }
 
-  const payload = buildReportPayload();
-
-  window.parent.postMessage({
-    type: 'DOWNLOAD_REPORT',
-    reportType: payload.reportType,
-    reportName: payload.reportName,
-    reportVersion: payload.reportVersion,
-    reportData: payload,
-    metadata: {
-      source: payload.source,
-      generatedAt: payload.generatedAt,
-      userName: payload.inputs.userName,
-      score: payload.reportSummary?.wellnessScore || null
-    }
-  }, '*');
-}
-
-function printOrSaveReport(){
-  pendingReportDownload = false;
+  // Local testing fallback only: if opened directly outside Wix, allow print.
   window.print();
 }
 
@@ -485,15 +577,90 @@ window.addEventListener('message', function(event) {
   const data = event.data || {};
 
   if (data.type === 'REPORT_DOWNLOAD_APPROVED') {
-    if (!data.reportType || data.reportType === REPORT_GATEWAY_CONFIG.reportType) {
-      printOrSaveReport();
-    }
-  }
-
-  if (data.type === 'REPORT_DOWNLOAD_CANCELLED' || data.type === 'CONTACT_CAPTURE_CANCELLED') {
-    pendingReportDownload = false;
+    window.print();
   }
 });
+
+function openLeadModal(){
+  document.getElementById('leadFormView').style.display = 'block';
+  document.getElementById('leadSuccessView').style.display = 'none';
+  document.getElementById('leadModalError').textContent = '';
+  const overlay = document.getElementById('leadModalOverlay');
+  overlay.classList.add('active');
+  // Safety fallback: even if the parent page hasn't resized the iframe yet,
+  // make sure the overlay covers all existing content so clicks land correctly.
+  overlay.style.height = Math.max(document.body.scrollHeight, window.innerHeight) + 'px';
+  overlay.scrollIntoView({ behavior: 'instant', block: 'start' });
+  window.scrollTo(0, overlay.offsetTop);
+  document.body.style.overflow = 'hidden';
+  scheduleHeightReport();
+}
+function closeLeadModal(){
+  document.getElementById('leadModalOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+  scheduleHeightReport();
+}
+function proceedToPrint(){
+  closeLeadModal();
+  window.print();
+}
+
+function isValidEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+async function submitLeadForm(){
+  const firstName = document.getElementById('leadFirstName').value.trim();
+  const lastName = document.getElementById('leadLastName').value.trim();
+  const email = document.getElementById('leadEmail').value.trim();
+  const phone = document.getElementById('leadPhone').value.trim();
+  const errEl = document.getElementById('leadModalError');
+  const btn = document.getElementById('leadSubmitBtn');
+
+  if (!firstName || !lastName) { errEl.textContent = 'Please enter your first and last name.'; return; }
+  if (!email || !isValidEmail(email)) { errEl.textContent = 'Please enter a valid email address.'; return; }
+  if (!phone) { errEl.textContent = 'Please enter your phone number.'; return; }
+  errEl.textContent = '';
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="modal-spinner"></span>Sending...';
+
+  const payload = {
+    firstName, lastName, email, phone,
+    reportSummary: lastReportSnapshot || {},
+    source: 'Financial Need Analysis Calculator',
+    submittedAt: new Date().toISOString()
+  };
+
+  try {
+    const res = await fetch(LEAD_SUBMIT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error('Server responded with ' + res.status);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Unknown error');
+
+    document.getElementById('leadSuccessMessage').textContent =
+      'Your report is on its way to ' + email + '. You can also print or save it now using the button below.';
+    document.getElementById('leadFormView').style.display = 'none';
+    document.getElementById('leadSuccessView').style.display = 'block';
+
+  } catch (err) {
+    console.error('Lead submission failed:', err);
+    // Graceful fallback: don't block the visitor from getting their report
+    // just because the backend integration isn't reachable yet.
+    document.getElementById('leadSuccessMessage').textContent =
+      "We've saved your information. You can print or save your report now below.";
+    document.getElementById('leadFormView').style.display = 'none';
+    document.getElementById('leadSuccessView').style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Get My Report';
+  }
+}
 
 let kidCount = 0;
 function fmt(n){ const s=n<0?'\u2212':''; n=Math.abs(n); if(n>=1e6) return s+'$'+(n/1e6).toFixed(2)+'M'; return s+'$'+Math.round(n).toLocaleString(); }

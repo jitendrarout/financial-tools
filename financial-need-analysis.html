@@ -237,17 +237,9 @@
         </div>
       </div>
 
-      <button onclick="testWixMessage()">Test Wix Message</button>
+      <button onclick="testWixMessage()" style="padding:12px 20px; background:#0D2340; color:white; border:0; border-radius:6px;">Test Wix Message</button>
 
-      <script>
-        function testWixMessage() {
-          window.parent.postMessage({
-              type: "DOWNLOAD_REPORT",
-              reportType: "test",
-              reportName: "Test Report"
-          }, "*");
-        }
-      </script>
+
 
 
       <div class="btn-row"><button class="btn btn-primary" onclick="goTo(2)">Next →</button></div>
@@ -506,12 +498,48 @@
   </div>
 </div>
 
+
+
+
+
+
 <script>
 /* ════════════════════════════════════════════════════════════
    ACTION REQUIRED: Replace the line below with your real Calendly link.
    Example: 'https://calendly.com/jitendra-princefinancial/consultation'
    ════════════════════════════════════════════════════════════ */
 const CALENDLY_URL = 'https://calendly.com/conqueryourfuture/firststep';
+
+  function sendMessageToWix(payload) {
+    console.log("HTML: sending message to Wix", payload);
+
+    try {
+      window.parent.postMessage(payload, "*");
+    } catch (e) {
+      console.error("HTML: window.parent.postMessage failed", e);
+    }
+
+    try {
+      window.top.postMessage(payload, "*");
+    } catch (e) {
+      console.error("HTML: window.top.postMessage failed", e);
+    }
+  }
+
+  function testWixMessage() {
+    sendMessageToWix({
+      type: "DOWNLOAD_REPORT",
+      reportType: "test",
+      reportName: "Test Report",
+      reportData: {
+        test: true
+      },
+      metadata: {
+        generatedAt: new Date().toISOString(),
+        source: "html-test-button"
+      }
+    });
+  }
 
 function openCalendlyPopup(){
   if (typeof Calendly === 'undefined') {
